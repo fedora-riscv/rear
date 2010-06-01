@@ -1,6 +1,6 @@
 Name: rear
-Version: 1.7.20
-Release: 2%{?dist}
+Version: 1.7.24
+Release: 1%{?dist}
 Summary: Relax and Recover (ReaR) is a Linux Disaster Recovery framework
 
 Group: Applications/Archiving
@@ -11,10 +11,13 @@ BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 # all RPM based systems seem to have this
-Requires: mingetty binutils portmap iputils
-Requires: iproute
-Requires: /usr/bin/mkisofs
-Requires: tar
+Requires: mingetty binutils iputils tar gzip ethtool syslinux
+Requires: iproute redhat-lsb
+%if 0%{?fedora_version} >= 9
+Requires: genisoimage rpcbind
+%else
+Requires: mkisofs portmap
+%endif
 
 
 %description
@@ -84,8 +87,14 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Sun Jul 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.7.20-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
+* Mon May 09 2010 Gratien D'haese <gdha at sourceforge.net> - 1.7.24-1
+- added release entry
+
+* Fri Jan 09 2010 Gratien D'haese <gdha at sourceforge.net> - 1.7.23-1
+- added release entry
+
+* Mon Nov 16 2009 Gratien D'haese <gdha at sourceforge.net> - 1.7.22-1
+- Changed Requires fields for Fedora 10 and higher
 
 * Thu Apr 02 2009 Gratien D'haese <gdha at sourceforge.net> - 1.7.20-1
 - update %%_localstatedir/rear to %%_localstatedir/lib/rear
