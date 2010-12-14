@@ -89,8 +89,6 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-<<<<<<< HEAD
-=======
 * Thu Nov 25 2010 Gratien D'haese <gdha at sourceforge.net> - 1.7.26-1
 - fix bugzilla 657174 Rescue image freezes during the boot while executing init
 
