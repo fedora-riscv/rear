@@ -92,7 +92,6 @@ rm -rf $RPM_BUILD_ROOT
 * Thu Nov 25 2010 Gratien D'haese <gdha at sourceforge.net> - 1.7.26-1
 - fix bugzilla 657174 Rescue image freezes during the boot while executing init
 
->>>>>>> master
 * Fri Jun 04 2010 Gratien D'haese <gdha at sourceforge.net> - 1.7.25-1
 - added the %%ifarch part for syslinux to avoid warning on ppc/ppc64
 - fixed bugzilla 600217 (missing Fedora links)
