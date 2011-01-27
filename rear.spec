@@ -1,5 +1,5 @@
 Name: rear
-Version: 1.7.26
+Version: 1.9
 Release: 1%{?dist}
 Summary: Relax and Recover (ReaR) is a Linux Disaster Recovery framework
 
@@ -27,7 +27,7 @@ Relax and Recover (abbreviated rear) is a highly modular disaster recovery
 framework for GNU/Linux based systems, but can be easily extended to other
 UNIX alike systems. The disaster recovery information (and maybe the backups)
 can be stored via the network, local on hard disks or USB devices, DVD/CD-R,
-tape, etc. The result is also a bootable image that is capable of booting via
+tape, etc. The result is also a boot-able image that is capable of booting via
 PXE, DVD/CD and USB media.
 
 Relax and Recover integrates with other backup software and provides integrated
@@ -71,6 +71,8 @@ sed	-e 's#/etc#%{_sysconfdir}#' \
 rm -f $RPM_BUILD_ROOT%{_datadir}/rear/README
 rm -f $RPM_BUILD_ROOT%{_datadir}/rear/CHANGES
 rm -f $RPM_BUILD_ROOT%{_datadir}/rear/COPYING
+rm -f $RPM_BUILD_ROOT%{_datadir}/rear/AUTHORS
+rm -f $RPM_BUILD_ROOT%{_datadir}/rear/TODO
 rm -rf $RPM_BUILD_ROOT%{_datadir}/rear/doc/*
 
 %clean
@@ -79,8 +81,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc COPYING CHANGES README
-%doc doc/README.doc doc/relax-recover-*
+%doc COPYING CHANGES README AUTHORS TODO
+%doc doc/README.doc doc/configuration-examples.txt
 %{_sbindir}/rear
 %{_datadir}/rear
 %{_localstatedir}/lib/rear
@@ -89,18 +91,15 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Thu Nov 25 2010 Gratien D'haese <gdha at sourceforge.net> - 1.7.26-1
-- fix bugzilla 657174 Rescue image freezes during the boot while executing init
+* Mon Jan 24 2011 Gratien D'haese <gdha at sourceforge.net> - 1.9-1
+- New development release with P2V, V2V functionality, and more
+- added AUTHORS, TODO to %%doc and rm from datadir
 
 * Fri Jun 04 2010 Gratien D'haese <gdha at sourceforge.net> - 1.7.25-1
 - added the %%ifarch part for syslinux to avoid warning on ppc/ppc64
-- fixed bugzilla 600217 (missing Fedora links)
 
-* Mon May 09 2010 Gratien D'haese <gdha at sourceforge.net> - 1.7.24-1
-- added release entry
-
-* Fri Jan 09 2010 Gratien D'haese <gdha at sourceforge.net> - 1.7.23-1
-- added release entry
+* Wed Feb 24 2010 Gratien D'haese <gdha at sourceforge.net> - 1.7.24-1
+- update spec file for fedora12
 
 * Mon Nov 16 2009 Gratien D'haese <gdha at sourceforge.net> - 1.7.22-1
 - Changed Requires fields for Fedora 10 and higher
@@ -112,15 +111,9 @@ rm -rf $RPM_BUILD_ROOT
 - updated description, made the spec file a bit more readable
 - changed BuildArchives in BuildArch
 
-* Sun Mar 15 2009 Schlomo Schapiro <rear at schlomo.schapiro.org> - 1.7.18-1
-- updated spec file to support openSUSE 11.1
-
 * Fri Mar 13 2009 Gratien D'haese <gdha at sourceforge.net> - 1.7.17-1
 - do not gzip man page in spec file - rpmbuild will do this for us
 - added extra %%doc line for excluding man page from doc itself
-
-* Thu Feb 26 2009 Gratien D'haese <gdha at sourceforge.net> - 1.7.16-1
-- make the spec better readable and removed not spec related items in changelog
 
 * Tue Feb 04 2009 Gratien D'haese <gdha at sourceforge.net> - 1.7.15-1
 - update the Fedora spec file with the 1.7.14 items
@@ -128,9 +121,6 @@ rm -rf $RPM_BUILD_ROOT
 
 * Thu Jan 29 2009 Schlomo Schapiro <rear at schlomo.schapiro.org> - 1.7.14-1
 - added man page
-
-* Tue Jan 20 2009 Gratien D'haese <gdha at sourceforge.net> - 1.7.13-1
-- add COPYING license file
 
 * Wed Dec 17 2008 Gratien D'haese <gdha at sourceforge.net> - 1.7.10-1
 - remove contrib entry from %%doc line in spec file
