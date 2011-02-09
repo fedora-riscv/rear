@@ -1,6 +1,6 @@
 Name: rear
 Version: 1.7.25
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Relax and Recover (ReaR) is a Linux Disaster Recovery framework
 
 Group: Applications/Archiving
@@ -89,6 +89,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Feb 09 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.7.25-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
 * Fri Jun 04 2010 Gratien D'haese <gdha at sourceforge.net> - 1.7.25-1
 - added the %%ifarch part for syslinux to avoid warning on ppc/ppc64
 - fixed bugzilla 600217 (missing Fedora links)
