@@ -1,5 +1,5 @@
 Name: rear
-Version: 1.10.0
+Version: 1.11.0
 Release: 1%{?dist}
 Summary: Relax and Recover (ReaR) is a Linux Disaster Recovery framework
 
@@ -11,7 +11,7 @@ BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 # all RPM based systems seem to have this
-Requires: mingetty binutils iputils tar gzip ethtool
+Requires: mingetty binutils iputils tar gzip ethtool parted
 Requires: iproute redhat-lsb
 %if 0%{?fedora_version} >= 9
 Requires: genisoimage rpcbind
@@ -69,7 +69,6 @@ sed	-e 's#/etc#%{_sysconfdir}#' \
 
 # remove doc files under  $RPM_BUILD_ROOT/usr/share/rear
 rm -f $RPM_BUILD_ROOT%{_datadir}/rear/README
-rm -f $RPM_BUILD_ROOT%{_datadir}/rear/CHANGES
 rm -f $RPM_BUILD_ROOT%{_datadir}/rear/COPYING
 rm -f $RPM_BUILD_ROOT%{_datadir}/rear/AUTHORS
 rm -f $RPM_BUILD_ROOT%{_datadir}/rear/TODO
@@ -81,7 +80,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc COPYING CHANGES README AUTHORS TODO
+%doc COPYING README AUTHORS TODO
 %doc doc/README.doc doc/configuration-examples.txt
 %{_sbindir}/rear
 %{_datadir}/rear
@@ -91,17 +90,15 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Mon Feb 21 2011 Gratien D'haese <gdha at sourceforge.net> - 1.10.0
-- new release
+* Mon May 23 2011 Gratien D'haese <gdha at sourceforge.net> - 1.11.0-1
+- placeholder for release
 
 * Mon Jan 24 2011 Gratien D'haese <gdha at sourceforge.net> - 1.9-1
+- New development release with P2V, V2V functionality, and more
 - added AUTHORS, TODO to %%doc and rm from datadir
 
 * Fri Jun 04 2010 Gratien D'haese <gdha at sourceforge.net> - 1.7.25-1
 - added the %%ifarch part for syslinux to avoid warning on ppc/ppc64
-
-* Mon Nov 16 2009 Gratien D'haese <gdha at sourceforge.net> - 1.7.22-1
-- Changed Requires fields for Fedora 10 and higher
 
 * Thu Apr 02 2009 Gratien D'haese <gdha at sourceforge.net> - 1.7.20-1
 - update %%_localstatedir/rear to %%_localstatedir/lib/rear
@@ -111,11 +108,15 @@ rm -rf $RPM_BUILD_ROOT
 - changed BuildArchives in BuildArch
 
 * Fri Mar 13 2009 Gratien D'haese <gdha at sourceforge.net> - 1.7.17-1
+- do not gzip man page in spec file - rpmbuild will do this for us
 - added extra %%doc line for excluding man page from doc itself
 
 * Tue Feb 04 2009 Gratien D'haese <gdha at sourceforge.net> - 1.7.15-1
 - update the Fedora spec file with the 1.7.14 items
 - added VAR_DIR (%%{_localstatedir}) variable to rear for /var/rear/recovery system data
+
+* Thu Jan 29 2009 Schlomo Schapiro <rear at schlomo.schapiro.org> - 1.7.14-1
+- added man page
 
 * Wed Dec 17 2008 Gratien D'haese <gdha at sourceforge.net> - 1.7.10-1
 - remove contrib entry from %%doc line in spec file
