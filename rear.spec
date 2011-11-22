@@ -1,7 +1,7 @@
 Name: rear
-Version: 1.11.0
+Version: 1.12.0
 Release: 1%{?dist}
-Summary: Relax and Recover (ReaR) is a Linux Disaster Recovery framework
+Summary: Relax and Recover (Rear) is a Linux Disaster Recovery framework
 
 Group: Applications/Archiving
 License: GPLv2+
@@ -35,7 +35,7 @@ bare metal disaster recovery abilities to the compatible backup software.
 
 %prep
 %setup -q
- 
+
 %build
 # no code to compile - all bash scripts
 
@@ -81,7 +81,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc COPYING README AUTHORS TODO
-%doc doc/README.doc doc/configuration-examples.txt
+%doc doc/*.txt
 %{_sbindir}/rear
 %{_datadir}/rear
 %{_localstatedir}/lib/rear
@@ -90,7 +90,7 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Mon May 23 2011 Gratien D'haese <gdha at sourceforge.net> - 1.11.0-1
+* Mon Nov 21 2011 Gratien D'haese <gdha at sourceforge.net> - 1.12.0-1
 - placeholder for release
 
 * Mon Jan 24 2011 Gratien D'haese <gdha at sourceforge.net> - 1.9-1
