@@ -1,24 +1,19 @@
 Name: rear
-Version: 1.11.0
+Version: 1.13.0
 Release: 1%{?dist}
-Summary: Relax and Recover (ReaR) is a Linux Disaster Recovery framework
+Summary: Relax and Recover (Rear) is a Linux Disaster Recovery framework
 
 Group: Applications/Archiving
 License: GPLv2+
 URL: http://rear.sourceforge.net
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 BuildArch: noarch
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 # all RPM based systems seem to have this
 Requires: mingetty binutils iputils tar gzip ethtool parted
 Requires: iproute redhat-lsb
-%if 0%{?fedora_version} >= 9
 Requires: genisoimage rpcbind
-%else
-Requires: mkisofs portmap
-%endif
-%ifarch %ix86 x86_64 amd64
+%ifarch %ix86 x86_64
 Requires: syslinux
 %endif
 
@@ -35,12 +30,11 @@ bare metal disaster recovery abilities to the compatible backup software.
 
 %prep
 %setup -q
- 
+
 %build
 # no code to compile - all bash scripts
 
 %install
-rm -rf $RPM_BUILD_ROOT
 # create directories
 mkdir -vp \
 	$RPM_BUILD_ROOT%{_mandir}/man8 \
@@ -71,17 +65,13 @@ sed	-e 's#/etc#%{_sysconfdir}#' \
 rm -f $RPM_BUILD_ROOT%{_datadir}/rear/README
 rm -f $RPM_BUILD_ROOT%{_datadir}/rear/COPYING
 rm -f $RPM_BUILD_ROOT%{_datadir}/rear/AUTHORS
-rm -f $RPM_BUILD_ROOT%{_datadir}/rear/TODO
 rm -rf $RPM_BUILD_ROOT%{_datadir}/rear/doc/*
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 
 %files
 %defattr(-,root,root,-)
-%doc COPYING README AUTHORS TODO
-%doc doc/README.doc doc/configuration-examples.txt
+%doc AUTHORS COPYING README
+%doc doc/*.txt
 %{_sbindir}/rear
 %{_datadir}/rear
 %{_localstatedir}/lib/rear
@@ -90,7 +80,17 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Mon May 23 2011 Gratien D'haese <gdha at sourceforge.net> - 1.11.0-1
+* Tue Apr 17 2012 Gratien D'haese <gdha at sourceforge.net> - 1.13.0-1
+- placeholder for release
+
+* Sun Mar  4 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 1.12.0-3
+- merge F-16 newer version to F-17+
+- Clean out long obsolete Fedora versions (F-9) checks
+
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.12.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
+* Mon Nov 21 2011 Gratien D'haese <gdha at sourceforge.net> - 1.12.0-1
 - placeholder for release
 
 * Mon Jan 24 2011 Gratien D'haese <gdha at sourceforge.net> - 1.9-1
