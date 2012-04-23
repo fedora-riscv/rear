@@ -8,6 +8,8 @@ License: GPLv2+
 URL: http://rear.sourceforge.net
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 BuildArch: noarch
+# For EPEL-5
+BuildRoot : %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 # all RPM based systems seem to have this
 Requires: mingetty binutils iputils tar gzip ethtool parted
@@ -35,6 +37,9 @@ bare metal disaster recovery abilities to the compatible backup software.
 # no code to compile - all bash scripts
 
 %install
+# for EPEL-5
+rm -rf $RPM_BUILD_ROOT
+
 # create directories
 mkdir -vp \
 	$RPM_BUILD_ROOT%{_mandir}/man8 \
