@@ -1,6 +1,6 @@
 Name: rear
 Version: 1.13.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Relax and Recover (Rear) is a Linux Disaster Recovery framework
 
 Group: Applications/Archiving
@@ -14,7 +14,9 @@ BuildRoot : %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 # all RPM based systems seem to have this
 Requires: mingetty binutils iputils tar gzip ethtool parted
 Requires: iproute redhat-lsb
-Requires: genisoimage rpcbind
+#Requires: genisoimage rpcbind
+# for EPEL-5
+Requires: mkisofs portmap
 %ifarch %ix86 x86_64
 Requires: syslinux
 %endif
@@ -85,8 +87,8 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/rear/doc/*
 
 
 %changelog
-* Tue Apr 17 2012 Gratien D'haese <gdha at sourceforge.net> - 1.13.0-1
-- placeholder for release
+* Tue May 22 2012 Gratien D'haese <gdha at sourceforge.net> - 1.13.0-2
+- Requires: mkisofs portmap modification required for EPEL-5
 
 * Sun Mar  4 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 1.12.0-3
 - merge F-16 newer version to F-17+
