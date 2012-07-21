@@ -1,6 +1,6 @@
 Name: rear
 Version: 1.12.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Relax and Recover (Rear) is a Linux Disaster Recovery framework
 
 Group: Applications/Archiving
@@ -81,6 +81,9 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/rear/doc/*
 
 
 %changelog
+* Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.12.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
 * Sun Mar  4 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 1.12.0-3
 - merge F-16 newer version to F-17+
 - Clean out long obsolete Fedora versions (F-9) checks
