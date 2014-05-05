@@ -7,7 +7,7 @@
 
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 Name: rear
-Version: 1.15
+Version: 1.16
 Release: 1%{?rpmrelease}%{?dist}
 License: GPLv3
 Group: Applications/File
@@ -25,11 +25,11 @@ Requires: binutils
 Requires: ethtool
 Requires: gzip
 Requires: iputils
-Requires: mingetty
 Requires: parted
 Requires: tar
-Requires: util-linux
 Requires: openssl
+Requires: gawk
+Requires: attr
 
 ### If you require NFS, you may need the below packages
 #Requires: nfsclient portmap rpcbind
@@ -89,6 +89,15 @@ Requires: mkisofs
 #Requires: redhat-lsb
 %endif
 
+# mingetty is not available anymore with RHEL 7 (use agetty instead via systemd)
+# Note that CentOS also has %rhel defined so there is no need to use %centos
+%if 0%{?rhel} && 0%{?rhel} > 6
+Requires: util-linux
+%else
+Requires: mingetty
+Requires: util-linux
+%endif
+
 ### The rear-snapshot package is no more
 Obsoletes: rear-snapshot
 
@@ -113,7 +122,7 @@ removes any excuse for not having a disaster recovery solution implemented.
 Professional services and support are available.
 
 %prep
-%setup -q
+%setup -q 
 
 echo "30 1 * * * root /usr/sbin/rear checklayout || /usr/sbin/rear mkrescue" >rear.cron
 
