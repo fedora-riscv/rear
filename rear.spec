@@ -7,8 +7,8 @@
 
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 Name: rear
-Version: 1.17.0
-Release: 2%{?rpmrelease}%{?dist}
+Version: 1.17.1
+Release: 1%{?rpmrelease}%{?dist}
 License: GPLv3
 Group: Applications/File
 URL: http://relax-and-recover.org/
@@ -199,9 +199,6 @@ OS_VERSION="13.2"
 %{_sbindir}/rear
 
 %changelog
-* Thu Jun 18 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.17.0-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
-
 * Fri Oct 17 2014 Gratien D'haese <gratien.dhaese@gmail.com>
 - added the suse_version lines to identify the corresponding OS_VERSION
 
