@@ -7,7 +7,7 @@
 
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 Name: rear
-Version: 1.16.1
+Version: 1.17.1
 Release: 1%{?rpmrelease}%{?dist}
 License: GPLv3
 Group: Applications/File
@@ -64,9 +64,9 @@ Requires: genisoimage
 Requires: mkisofs
 %endif
 ###
-%if %{!?sles_version:1}0
-Requires: lsb
-%endif
+#%if %{!?sles_version:1}0
+#Requires: lsb
+#%endif
 %endif
 
 %if %{?mandriva_version:1}0
@@ -99,12 +99,12 @@ Requires: util-linux
 %endif
 
 ### The rear-snapshot package is no more
-Obsoletes: rear-snapshot
+#Obsoletes: rear-snapshot
 
 %description
 Relax-and-Recover is the leading Open Source disaster recovery and system
-migration solution, and successor to mkcdrec. It comprises of a modular
-framework and ready-to-go workflows for many common situations to produce
+migration solution. It comprises of a modular
+frame-work and ready-to-go workflows for many common situations to produce
 a bootable image and restore from backup using this image. As a benefit,
 it allows to restore to different hardware and can therefore be used as
 a migration tool as well.
@@ -121,6 +121,12 @@ removes any excuse for not having a disaster recovery solution implemented.
 
 Professional services and support are available.
 
+%pre
+if [ $1 -gt 1 ] ; then
+# during upgrade remove obsolete directories
+%{__rm} -rf %{_datadir}/rear/output/NETFS
+fi
+
 %prep
 %setup -q 
 
@@ -130,9 +136,45 @@ echo "30 1 * * * root /usr/sbin/rear checklayout || /usr/sbin/rear mkrescue" >re
 %{?fedora:echo -e "OS_VENDOR=Fedora\nOS_VERSION=%{?fedora}" >etc/rear/os.conf}
 %{?mdkversion:echo -e "OS_VENDOR=Mandriva\nOS_VERSION=%{distro_rel}" >etc/rear/os.conf}
 %{?rhel:echo -e "OS_VENDOR=RedHatEnterpriseServer\nOS_VERSION=%{?rhel}" >etc/rear/os.conf}
-%{?sles_version:echo -e "OS_VENDOR=SUSE_LINUX\nOS_VERSION=%{?sles_version}" >etc/rear/os.conf}
-### Doesn't work as, suse_version for OpenSUSE 11.3 is 1130
+#%{?sles_version:echo -e "OS_VENDOR=SUSE_LINUX\nOS_VERSION=%{?sles_version}" >etc/rear/os.conf}
 #%{?suse_version:echo -e "OS_VENDOR=SUSE_LINUX\nOS_VERSION=%{?suse_version}" >etc/rear/os.conf}
+%if 0%{?suse_version} == 1110
+# SLE 11
+OS_VERSION="11"
+%endif
+%if 0%{?suse_version} == 1130
+# openSUSE 11.3
+OS_VERSION="11.3"
+%endif
+%if 0%{?suse_version} == 1140
+# openSUSE 11.4
+OS_VERSION="11.4"
+%endif
+%if 0%{?suse_version} == 1210
+# openSUSE 12.1
+OS_VERSION="12.1"
+%endif
+%if 0%{?suse_version} == 1220
+# openSUSE 12.2
+OS_VERSION="12.2"
+%endif
+%if 0%{?suse_version} == 1230
+# openSUSE 12.3
+OS_VERSION="12.3"
+%endif
+%if 0%{?suse_version} == 1310
+# openSUSE 13.1
+OS_VERSION="13.1"
+%endif
+%if 0%{?suse_version} == 1315
+# SLE 12
+OS_VERSION="12"
+%endif
+%if 0%{?suse_version} == 1320
+# openSUSE 13.2
+OS_VERSION="13.2"
+%endif
+%{?suse_version:echo -e "OS_VENDOR=SUSE_LINUX\nOS_VERSION=$OS_VERSION" >etc/rear/os.conf}
 
 %build
 
@@ -157,6 +199,12 @@ echo "30 1 * * * root /usr/sbin/rear checklayout || /usr/sbin/rear mkrescue" >re
 %{_sbindir}/rear
 
 %changelog
+* Fri Oct 17 2014 Gratien D'haese <gratien.dhaese@gmail.com>
+- added the suse_version lines to identify the corresponding OS_VERSION
+
+* Fri Jun 20 2014 Gratien D'haese <gratien.dhaese@gmail.com>
+- add %%pre section
+
 * Thu Apr 11 2013 Gratien D'haese <gratien.dhaese@gmail.com>
 - changes Source
 
