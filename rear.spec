@@ -8,8 +8,8 @@
 
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 Name: rear
-Version: 1.17.2
-Release: 2%{?rpmrelease}%{?dist}
+Version: 1.18
+Release: 1%{?rpmrelease}%{?dist}
 License: GPLv3
 Group: Applications/File
 URL: http://relax-and-recover.org/
@@ -25,14 +25,14 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 # But the meaning of architecture dependent packages should be on what architectures they will work.
 # Therefore only those architectures that are actually supported are explicitly listed.
 # This avoids that rear can be "just installed" on architectures that are actually not supported (e.g. ARM or IBM z Systems):
-ExclusiveArch: %ix86 x86_64 ppc ppc64
+ExclusiveArch: %ix86 x86_64 ppc ppc64 ppc64le
 # Furthermore for some architectures it requires architecture dependent packages (like syslinux for x86 and x86_64)
 # so that rear must be architecture dependent because ifarch conditions never match in case of "BuildArch: noarch"
 # see the GitHub issue https://github.com/rear/rear/issues/629
 %ifarch %ix86 x86_64
 Requires: syslinux
 %endif
-# In the end this should tell the user that rear is known to work only on ix86 x86_64 ppc ppc64
+# In the end this should tell the user that rear is known to work only on ix86 x86_64 ppc ppc64 ppc64le
 # and on ix86 x86_64 syslinux is explicitly required to make the bootable ISO image
 # (in addition to the default installed bootloader grub2) while on ppc ppc64 the
 # default installed bootloader yaboot is also useed to make the bootable ISO image.
@@ -96,17 +96,10 @@ Requires: mkisofs
 #Requires: redhat-lsb
 %endif
 
-# mingetty is not available anymore with RHEL 7 (use agetty instead via systemd)
 # Note that CentOS also has rhel defined so there is no need to use centos
-%if 0%{?rhel} && 0%{?rhel} > 6
-Requires: util-linux
-%else
-Requires: mingetty
+%if 0%{?rhel}
 Requires: util-linux
 %endif
-
-### The rear-snapshot package is no more
-#Obsoletes: rear-snapshot
 
 %description
 Relax-and-Recover is the leading Open Source disaster recovery and system
@@ -204,9 +197,6 @@ OS_VERSION="13.2"
 %{_sbindir}/rear
 
 %changelog
-* Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 1.17.2-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
-
 * Thu Jul 30 2015 Johannes Meixner <jsmeix@suse.de>
 - For a changelog see the rear-release-notes.txt file.
 
