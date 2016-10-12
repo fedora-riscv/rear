@@ -1,14 +1,14 @@
 %define rpmrelease %{nil}
 %define debug_package %{nil}
 
-### Work-around the fact that OpenSUSE/SLES _always_ defined both :-/
+### Work-around the fact that openSUSE/SLES _always_ defined both :-/
 %if 0%{?sles_version} == 0
 %undefine sles_version
 %endif
 
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 Name: rear
-Version: 1.18
+Version: 1.19
 Release: 1%{?rpmrelease}%{?dist}
 License: GPLv3
 Group: Applications/File
@@ -19,20 +19,20 @@ Source: https://sourceforge.net/projects/rear/files/rear/%{version}/rear-%{versi
 
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
-# rear contains only bash scripts plus documentation so that on first glance it colud be "BuildArch: noarch"
+# rear contains only bash scripts plus documentation so that on first glance it could be "BuildArch: noarch"
 # but actually it is not "noarch" because it only works on those architectures that are explicitly supported.
 # Of course the rear bash scripts can be installed on any architecture just as any binaries can be installed on any architecture.
 # But the meaning of architecture dependent packages should be on what architectures they will work.
 # Therefore only those architectures that are actually supported are explicitly listed.
 # This avoids that rear can be "just installed" on architectures that are actually not supported (e.g. ARM or IBM z Systems):
-ExclusiveArch: %ix86 x86_64 ppc ppc64 ppc64le
+ExclusiveArch: %ix86 x86_64 ppc ppc64 ppc64le ia64
 # Furthermore for some architectures it requires architecture dependent packages (like syslinux for x86 and x86_64)
 # so that rear must be architecture dependent because ifarch conditions never match in case of "BuildArch: noarch"
 # see the GitHub issue https://github.com/rear/rear/issues/629
 %ifarch %ix86 x86_64
 Requires: syslinux
 %endif
-# In the end this should tell the user that rear is known to work only on ix86 x86_64 ppc ppc64 ppc64le
+# In the end this should tell the user that rear is known to work only on ix86 x86_64 ppc ppc64 ppc64le ia64
 # and on ix86 x86_64 syslinux is explicitly required to make the bootable ISO image
 # (in addition to the default installed bootloader grub2) while on ppc ppc64 the
 # default installed bootloader yaboot is also useed to make the bootable ISO image.
@@ -66,7 +66,7 @@ Requires: attr
 
 %if %{?suse_version:1}0
 Requires: iproute2
-### recent SuSE versions have an extra nfs-client package
+### recent SUSE versions have an extra nfs-client package
 ### and switched to genisoimage/wodim
 %if 0%{?suse_version} >= 1020
 Requires: genisoimage
