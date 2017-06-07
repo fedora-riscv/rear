@@ -1,4 +1,4 @@
-%define rpmrelease %{nil}
+%define rpmrelease %nil
 %define debug_package %{nil}
 
 ### Work-around the fact that openSUSE/SLES _always_ defined both :-/
@@ -8,14 +8,14 @@
 
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 Name: rear
-Version: 2.00
-Release: 2%{?rpmrelease}%{?dist}
+Version: 2.1
+Release: 1%{?rpmrelease}%{?dist}
 License: GPLv3
 Group: Applications/File
 URL: http://relax-and-recover.org/
 
 # as GitHub stopped with download section we need to go back to Sourceforge for downloads
-Source: https://sourceforge.net/projects/rear/files/rear/%{version}/rear-%{version}.tar.gz
+Source: https://sourceforge.net/projects/rear/files/rear/2.1/rear-2.1.tar.gz
 
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
@@ -47,6 +47,7 @@ Requires: tar
 Requires: openssl
 Requires: gawk
 Requires: attr
+Requires: bc
 
 ### If you require NFS, you may need the below packages
 #Requires: nfsclient portmap rpcbind
@@ -92,7 +93,8 @@ Requires: mkisofs
 %if %{?centos_version:1}%{?fedora_version:1}%{?rhel_version:1}0
 Requires: crontabs
 Requires: iproute
-Requires: mkisofs
+#Requires: mkisofs
+Requires: genisoimage
 #Requires: redhat-lsb
 %endif
 
@@ -128,7 +130,7 @@ if [ $1 -gt 1 ] ; then
 fi
 
 %prep
-%setup -q
+%setup -q -n rear-2.1
 
 echo "30 1 * * * root /usr/sbin/rear checklayout || /usr/sbin/rear mkrescue" >rear.cron
 
@@ -192,14 +194,12 @@ OS_VERSION="13.2"
 %doc %{_mandir}/man8/rear.8*
 %config(noreplace) %{_sysconfdir}/cron.d/rear
 %config(noreplace) %{_sysconfdir}/rear/
+%config(noreplace) %{_sysconfdir}/rear/cert/
 %{_datadir}/rear/
 %{_localstatedir}/lib/rear/
 %{_sbindir}/rear
 
 %changelog
-* Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 2.00-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
-
 * Thu Jul 30 2015 Johannes Meixner <jsmeix@suse.de>
 - For a changelog see the rear-release-notes.txt file.
 
