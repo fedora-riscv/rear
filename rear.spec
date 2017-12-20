@@ -8,7 +8,7 @@
 
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 Name: rear
-Version: 2.2
+Version: 2.3
 Release: 1%{?rpmrelease}%{?dist}
 License: GPLv3
 Group: Applications/File
@@ -90,7 +90,7 @@ Requires: mkisofs
 %endif
 
 ### On RHEL/Fedora the genisoimage packages provides mkisofs
-%if %{?centos_version:1}%{?fedora_version:1}%{?rhel_version:1}0
+%if %{?centos_version:1}%{?fedora:1}%{?rhel_version:1}0
 Requires: crontabs
 Requires: iproute
 #Requires: mkisofs
@@ -190,7 +190,7 @@ OS_VERSION="13.2"
 
 %files
 %defattr(-, root, root, 0755)
-%doc AUTHORS COPYING README.adoc doc/*.txt
+%doc MAINTAINERS COPYING README.adoc doc/*.txt
 %doc %{_mandir}/man8/rear.8*
 %config(noreplace) %{_sysconfdir}/cron.d/rear
 %config(noreplace) %{_sysconfdir}/rear/
