@@ -184,9 +184,6 @@ OS_VERSION="13.2"
 %{__make} install DESTDIR="%{buildroot}"
 %{__install} -Dp -m0644 rear.cron %{buildroot}%{_sysconfdir}/cron.d/rear
 
-%clean
-%{__rm} -rf %{buildroot}
-
 %files
 %defattr(-, root, root, 0755)
 %doc MAINTAINERS COPYING README.adoc doc/*.txt
