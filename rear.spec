@@ -145,7 +145,6 @@ echo "30 1 * * * root /usr/sbin/rear checklayout || /usr/sbin/rear mkrescue" >re
 %{__rm} -rf %{buildroot}
 
 %files
-%defattr(-, root, root, 0755)
 %doc MAINTAINERS COPYING README.adoc doc/*.txt
 %doc %{_mandir}/man8/rear.8*
 %config(noreplace) %{_sysconfdir}/cron.d/rear
