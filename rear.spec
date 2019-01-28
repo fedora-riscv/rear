@@ -11,7 +11,6 @@ Name: rear
 Version: 2.4
 Release: 2%{?rpmrelease}%{?dist}
 License: GPLv3
-Group: Applications/File
 URL: http://relax-and-recover.org/
 
 # as GitHub stopped with download section we need to go back to Sourceforge for downloads
