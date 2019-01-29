@@ -139,9 +139,6 @@ echo "30 1 * * * root /usr/sbin/rear checklayout || /usr/sbin/rear mkrescue" >re
 %{__make} install DESTDIR="%{buildroot}"
 %{__install} -Dp -m0644 rear.cron %{buildroot}%{_sysconfdir}/cron.d/rear
 
-%clean
-%{__rm} -rf %{buildroot}
-
 %files
 %doc MAINTAINERS COPYING README.adoc doc/*.txt
 %doc %{_mandir}/man8/rear.8*
