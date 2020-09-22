@@ -3,7 +3,7 @@
 
 Name: rear
 Version: 2.6
-Release: 0%{?dist}
+Release: 1%{?dist}
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 URL: http://relax-and-recover.org/
 License: GPLv3
@@ -117,6 +117,10 @@ fi
 
 #-- CHANGELOG -----------------------------------------------------------------#
 %changelog
+* Tue Sep 22 2020 Christopher Engelhard <ce@lcts.de> - 2.6-1
+- Update to 2.6
+- Streamline & clean up spec file
+
 * Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.4-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
