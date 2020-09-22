@@ -31,6 +31,9 @@ Requires: syslinux
 # (in addition to the default installed bootloader grub2) while on ppc ppc64 the
 # default installed bootloader yaboot is also useed to make the bootable ISO image.
 
+# Required for HTML user guide
+BuildRequires: asciidoctor
+
 ### Mandatory dependencies:
 Requires: binutils
 Requires: ethtool
@@ -44,7 +47,6 @@ Requires: attr
 Requires: bc
 Requires: iproute
 Requires: genisoimage
-# Note that CentOS also has rhel defined so there is no need to use centos
 %if 0%{?rhel}
 Requires: util-linux
 %endif
@@ -89,14 +91,15 @@ Professional services and support are available.
 %autosetup -p1
 
 %build
-# nothing to build
+# build HTML user guide
+make doc
 
 %install
 %{make_install}
 
 #-- FILES ---------------------------------------------------------------------#
 %files
-%doc MAINTAINERS COPYING README.adoc doc/*.txt
+%doc MAINTAINERS COPYING README.adoc doc/*.txt doc/user-guide/*.html
 %doc %{_mandir}/man8/rear.8*
 %config(noreplace) %{_sysconfdir}/rear/
 %{_datadir}/rear/
