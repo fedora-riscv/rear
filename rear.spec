@@ -31,7 +31,7 @@ Requires: syslinux
 # (in addition to the default installed bootloader grub2) while on ppc ppc64 the
 # default installed bootloader yaboot is also useed to make the bootable ISO image.
 
-### Dependencies on all distributions
+### Mandatory dependencies:
 Requires: binutils
 Requires: ethtool
 Requires: gzip
@@ -50,22 +50,20 @@ Requires: genisoimage
 Requires: util-linux
 %endif
 
-# Optional features, leave out for now
+%if 0%{?rhel} >= 8 || 0%{?fedora}
+### Non-mandatory dependencies as RPM weak dependency
 ### If you require NFS, you may need the below packages
-#Requires: nfsclient portmap rpcbind
-
-### We drop LSB requirements because it pulls in too many dependencies
-### The OS is hardcoded in /etc/rear/os.conf instead
-#Requires: redhat-lsb
+Suggests: nfsclient portmap rpcbind
 
 ### Required for Bacula/MySQL support
-#Requires: bacula-mysql
+Suggests: bacula-mysql
 
 ### Required for OBDR
-#Requires: lsscsi sg3_utils
+Suggests: lsscsi sg3_utils
 
 ### Optional requirement
-#Requires: cfg2html
+Suggests: cfg2html
+%endif
 
 %description
 Relax-and-Recover is the leading Open Source disaster recovery and system
@@ -78,7 +76,7 @@ a migration tool as well.
 Currently Relax-and-Recover supports various boot media (incl. ISO, PXE,
 OBDR tape, USB or eSATA storage), a variety of network protocols (incl.
 sftp, ftp, http, nfs, cifs) as well as a multitude of backup strategies
-(incl.  IBM TSM, HP DataProtector, Symantec NetBackup, EMC NetWorker,
+(incl.  IBM TSM, MircroFocus Data Protector, Symantec NetBackup, EMC NetWorker,
 Bacula, Bareos, BORG, Duplicity, rsync).
 
 Relax-and-Recover was designed to be easy to set up, requires no maintenance
