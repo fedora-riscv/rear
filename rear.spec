@@ -94,13 +94,6 @@ Professional services and support are available.
 %install
 %{make_install}
 
-#-- SCRIPTLETS -----------------------------------------------------------------#
-%pre
-if [ $1 -gt 1 ] ; then
-# during upgrade remove obsolete directories
-rm -rf %{_datadir}/rear/output/NETFS
-fi
-
 #-- FILES ---------------------------------------------------------------------#
 %files
 %doc MAINTAINERS COPYING README.adoc doc/*.txt
