@@ -112,7 +112,7 @@ fi
 %config(noreplace) %{_sysconfdir}/cron.d/rear
 %config(noreplace) %{_sysconfdir}/rear/
 %{_datadir}/rear/
-%{_localstatedir}/lib/rear/
+%{_sharedstatedir}/rear/
 %{_sbindir}/rear
 
 #-- CHANGELOG -----------------------------------------------------------------#
