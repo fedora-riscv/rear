@@ -10,6 +10,10 @@ License: GPLv3
 
 # as GitHub stopped with download section we need to go back to Sourceforge for downloads
 Source0: https://sourceforge.net/projects/rear/files/rear/%{version}/rear-%{version}.tar.gz
+# Add cronjob and systemd timer as documentation
+Source1: rear.cron
+Source2: rear.service
+Source3: rear.timer
 # Skip buildin modules, RHBZ#1831311
 Patch0: 0001-skip-kernel-buildin-modules.patch
 
@@ -96,11 +100,16 @@ make doc
 
 %install
 %{make_install}
+install -p -d %{buildroot}%{_docdir}/%{name}/
+install -m 0644 %{SOURCE1} %{buildroot}%{_docdir}/%{name}/
+install -m 0644 %{SOURCE2} %{buildroot}%{_docdir}/%{name}/
+install -m 0644 %{SOURCE3} %{buildroot}%{_docdir}/%{name}/
 
 #-- FILES ---------------------------------------------------------------------#
 %files
 %doc MAINTAINERS COPYING README.adoc doc/*.txt doc/user-guide/*.html
 %doc %{_mandir}/man8/rear.8*
+%doc %{_docdir}/%{name}/rear.*
 %config(noreplace) %{_sysconfdir}/rear/
 %{_datadir}/rear/
 %{_sharedstatedir}/rear/
