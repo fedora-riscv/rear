@@ -1,0 +1,47 @@
+From df5e18b8d7c8359b48bc133bfa29734934d18160 Mon Sep 17 00:00:00 2001
+From: Johannes Meixner <jsmeix@suse.com>
+Date: Mon, 10 Aug 2020 16:20:38 +0200
+Subject: [PATCH] Merge pull request #2469 from
+ rear/skip-kernel-builtin-modules-issue2414
+
+In 400_copy_modules.sh skip copying kernel modules that are builtin modules.
+The new behaviour is that when modules are listed in modules.builtin
+and are also shown by modinfo then those modules are now skipped.
+Before for such modules the modules file(s) would have been included
+in the recovery system.
+See https://github.com/rear/rear/issues/2414
+---
+ usr/share/rear/build/GNU/Linux/400_copy_modules.sh | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/usr/share/rear/build/GNU/Linux/400_copy_modules.sh b/usr/share/rear/build/GNU/Linux/400_copy_modules.sh
+index d8d733d2..641b7f83 100644
+--- a/usr/share/rear/build/GNU/Linux/400_copy_modules.sh
++++ b/usr/share/rear/build/GNU/Linux/400_copy_modules.sh
+@@ -133,8 +133,13 @@ for dummy in "once" ; do
+         module=${module#.o}
+         # Strip trailing ".ko" if there:
+         module=${module#.ko}
+-        # Continue with the next module if the current one does not exist:
++        # Continue with the next module if the current one does not exist as a module file:
+         modinfo $module 1>/dev/null || continue
++        # Continue with the next module if the current one is a kernel builtin module
++        # cf. https://github.com/rear/rear/issues/2414#issuecomment-668632798
++        # Quoting the grep search value is mandatory here ($module might be empty or blank),
++        # cf. "Beware of the emptiness" in https://github.com/rear/rear/wiki/Coding-Style
++        grep -q "$( echo $module | tr '_-' '..' )" /lib/modules/$KERNEL_VERSION/modules.builtin && continue
+         # Resolve module dependencies:
+         # Get the module file plus the module files of other needed modules.
+         # This is currently only a "best effort" attempt because
+@@ -166,7 +171,10 @@ done
+ 
+ # Remove those modules that are specified in the EXCLUDE_MODULES array:
+ for exclude_module in "${EXCLUDE_MODULES[@]}" ; do
+-    # Continue with the next module if the current one does not exist:
++    # Continue with the next module only if the current one does not exist as a module file
++    # but do not continue with the next module if the current one is a kernel builtin module
++    # so when a module file exists that gets removed regardless if it is also a builtin module
++    # cf. https://github.com/rear/rear/issues/2414#issuecomment-669115481
+     modinfo $exclude_module 1>/dev/null || continue
+     # In this case it is ignored when a module exists but 'modinfo -F filename' cannot show its filename
+     # because then it is assumed that also no module file had been copied above:

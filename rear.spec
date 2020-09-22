@@ -3,13 +3,15 @@
 
 Name: rear
 Version: 2.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 URL: http://relax-and-recover.org/
 License: GPLv3
 
 # as GitHub stopped with download section we need to go back to Sourceforge for downloads
 Source0: https://sourceforge.net/projects/rear/files/rear/%{version}/rear-%{version}.tar.gz
+# Skip buildin modules, RHBZ#1831311
+Patch0: 0001-skip-kernel-buildin-modules.patch
 
 # rear contains only bash scripts plus documentation so that on first glance it could be "BuildArch: noarch"
 # but actually it is not "noarch" because it only works on those architectures that are explicitly supported.
@@ -117,6 +119,9 @@ fi
 
 #-- CHANGELOG -----------------------------------------------------------------#
 %changelog
+* Tue Sep 22 2020 Christopher Engelhard <ce@lcts.de> - 2.6-2
+- Backport upstream PR#2469 to fix RHBZ #1831311
+
 * Tue Sep 22 2020 Christopher Engelhard <ce@lcts.de> - 2.6-1
 - Update to 2.6
 - Streamline & clean up spec file
