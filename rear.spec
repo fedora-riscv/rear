@@ -42,7 +42,6 @@ Requires: openssl
 Requires: gawk
 Requires: attr
 Requires: bc
-Requires: crontabs
 Requires: iproute
 Requires: genisoimage
 # Note that CentOS also has rhel defined so there is no need to use centos
@@ -89,14 +88,11 @@ Professional services and support are available.
 %prep
 %autosetup -p1
 
-echo "30 1 * * * root /usr/sbin/rear checklayout || /usr/sbin/rear mkrescue" >rear.cron
-
 %build
 # nothing to build
 
 %install
 %{make_install}
-install -Dp -m0644 rear.cron %{buildroot}%{_sysconfdir}/cron.d/rear
 
 #-- SCRIPTLETS -----------------------------------------------------------------#
 %pre
@@ -109,7 +105,6 @@ fi
 %files
 %doc MAINTAINERS COPYING README.adoc doc/*.txt
 %doc %{_mandir}/man8/rear.8*
-%config(noreplace) %{_sysconfdir}/cron.d/rear
 %config(noreplace) %{_sysconfdir}/rear/
 %{_datadir}/rear/
 %{_sharedstatedir}/rear/
