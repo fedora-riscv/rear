@@ -1,21 +1,15 @@
-%define rpmrelease %{nil}
-%define debug_package %{nil}
+# this is purely a shell script, so no debug packages
+%global debug_package %{nil}
 
-### Work-around the fact that openSUSE/SLES _always_ defined both :-/
-%if 0%{?sles_version} == 0
-%undefine sles_version
-%endif
-
-Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 Name: rear
-Version: 2.4
-Release: 6%{?rpmrelease}%{?dist}
-License: GPLv3
+Version: 2.6
+Release: 0%{?dist}
+Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 URL: http://relax-and-recover.org/
+License: GPLv3
 
 # as GitHub stopped with download section we need to go back to Sourceforge for downloads
-Source: https://sourceforge.net/projects/rear/files/rear/%{version}/rear-%{version}.tar.gz
-
+Source0: https://sourceforge.net/projects/rear/files/rear/%{version}/rear-%{version}.tar.gz
 
 # rear contains only bash scripts plus documentation so that on first glance it could be "BuildArch: noarch"
 # but actually it is not "noarch" because it only works on those architectures that are explicitly supported.
@@ -46,7 +40,15 @@ Requires: openssl
 Requires: gawk
 Requires: attr
 Requires: bc
+Requires: crontabs
+Requires: iproute
+Requires: genisoimage
+# Note that CentOS also has rhel defined so there is no need to use centos
+%if 0%{?rhel}
+Requires: util-linux
+%endif
 
+# Optional features, leave out for now
 ### If you require NFS, you may need the below packages
 #Requires: nfsclient portmap rpcbind
 
@@ -62,44 +64,6 @@ Requires: bc
 
 ### Optional requirement
 #Requires: cfg2html
-
-%if %{?suse_version:1}0
-Requires: iproute2
-### recent SUSE versions have an extra nfs-client package
-### and switched to genisoimage/wodim
-%if 0%{?suse_version} >= 1020
-Requires: genisoimage
-%else
-Requires: mkisofs
-%endif
-###
-%endif
-
-%if %{?mandriva_version:1}0
-Requires: iproute2
-### Mandriva switched from 2008 away from mkisofs,
-### and as a specialty call the package cdrkit-genisoimage!
-%if 0%{?mandriva_version} >= 2008
-Requires: cdrkit-genisoimage
-%else
-Requires: mkisofs
-%endif
-#Requires: lsb
-%endif
-
-### On RHEL/Fedora the genisoimage packages provides mkisofs
-%if %{?centos_version:1}%{?fedora:1}%{?rhel_version:1}0
-Requires: crontabs
-Requires: iproute
-#Requires: mkisofs
-Requires: genisoimage
-#Requires: redhat-lsb
-%endif
-
-# Note that CentOS also has rhel defined so there is no need to use centos
-%if 0%{?rhel}
-Requires: util-linux
-%endif
 
 %description
 Relax-and-Recover is the leading Open Source disaster recovery and system
@@ -121,34 +85,37 @@ removes any excuse for not having a disaster recovery solution implemented.
 
 Professional services and support are available.
 
-%pre
-if [ $1 -gt 1 ] ; then
-# during upgrade remove obsolete directories
-%{__rm} -rf %{_datadir}/rear/output/NETFS
-fi
-
+#-- PREP, BUILD & INSTALL -----------------------------------------------------#
 %prep
-%setup -q
+%autosetup -p1
 
 echo "30 1 * * * root /usr/sbin/rear checklayout || /usr/sbin/rear mkrescue" >rear.cron
 
 %build
+# nothing to build
 
 %install
-%{__rm} -rf %{buildroot}
-%{__make} install DESTDIR="%{buildroot}"
-%{__install} -Dp -m0644 rear.cron %{buildroot}%{_sysconfdir}/cron.d/rear
+%{make_install}
+install -Dp -m0644 rear.cron %{buildroot}%{_sysconfdir}/cron.d/rear
 
+#-- SCRIPTLETS -----------------------------------------------------------------#
+%pre
+if [ $1 -gt 1 ] ; then
+# during upgrade remove obsolete directories
+rm -rf %{_datadir}/rear/output/NETFS
+fi
+
+#-- FILES ---------------------------------------------------------------------#
 %files
 %doc MAINTAINERS COPYING README.adoc doc/*.txt
 %doc %{_mandir}/man8/rear.8*
 %config(noreplace) %{_sysconfdir}/cron.d/rear
 %config(noreplace) %{_sysconfdir}/rear/
-%config(noreplace) %{_sysconfdir}/rear/cert/
 %{_datadir}/rear/
 %{_localstatedir}/lib/rear/
 %{_sbindir}/rear
 
+#-- CHANGELOG -----------------------------------------------------------------#
 %changelog
 * Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.4-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
