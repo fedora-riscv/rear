@@ -55,21 +55,6 @@ Requires: genisoimage
 Requires: util-linux
 %endif
 
-%if 0%{?rhel} >= 8 || 0%{?fedora}
-### Non-mandatory dependencies as RPM weak dependency
-### If you require NFS, you may need the below packages
-Suggests: nfsclient portmap rpcbind
-
-### Required for Bacula/MySQL support
-Suggests: bacula-mysql
-
-### Required for OBDR
-Suggests: lsscsi sg3_utils
-
-### Optional requirement
-Suggests: cfg2html
-%endif
-
 %description
 Relax-and-Recover is the leading Open Source disaster recovery and system
 migration solution. It comprises of a modular
@@ -123,7 +108,6 @@ install -m 0644 %{SOURCE3} %{buildroot}%{_docdir}/%{name}/
 - Build & ship HTML user guide
 - Remove %pre scriptlet, as it was introduced only to fix a
   specific upgrade issue with v1.15 in 2014
-- List optional dependencies as Suggests: where supported
 
 * Tue Sep 22 2020 Christopher Engelhard <ce@lcts.de> - 2.6-2
 - Backport upstream PR#2469 to fix RHBZ #1831311
