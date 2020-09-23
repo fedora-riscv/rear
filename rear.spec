@@ -3,7 +3,7 @@
 
 Name: rear
 Version: 2.6
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 URL: http://relax-and-recover.org/
 License: GPLv3
@@ -117,6 +117,14 @@ install -m 0644 %{SOURCE3} %{buildroot}%{_docdir}/%{name}/
 
 #-- CHANGELOG -----------------------------------------------------------------#
 %changelog
+* Wed Sep 23 2020 Christopher Engelhard <ce@lcts.de> - 2.6-3
+- Stop auto-creating a cronjob, but ship example cronjob/
+  systemd timer units in docdir instead (upstream issue #1829)
+- Build & ship HTML user guide
+- Remove %pre scriptlet, as it was introduced only to fix a
+  specific upgrade issue with v1.15 in 2014
+- List optional dependencies as Suggests: where supported
+
 * Tue Sep 22 2020 Christopher Engelhard <ce@lcts.de> - 2.6-2
 - Backport upstream PR#2469 to fix RHBZ #1831311
 
