@@ -36,6 +36,7 @@ Requires: syslinux
 # default installed bootloader yaboot is also useed to make the bootable ISO image.
 
 # Required for HTML user guide
+BuildRequires: make
 BuildRequires: asciidoctor
 
 ### Mandatory dependencies:
