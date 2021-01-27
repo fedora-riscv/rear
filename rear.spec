@@ -3,7 +3,7 @@
 
 Name: rear
 Version: 2.6
-Release: 3%{?dist}
+Release: 4%{?dist}
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 URL: http://relax-and-recover.org/
 License: GPLv3
@@ -103,6 +103,9 @@ install -m 0644 %{SOURCE3} %{buildroot}%{_docdir}/%{name}/
 
 #-- CHANGELOG -----------------------------------------------------------------#
 %changelog
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.6-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
 * Wed Sep 23 2020 Christopher Engelhard <ce@lcts.de> - 2.6-3
 - Stop auto-creating a cronjob, but ship example cronjob/
   systemd timer units in docdir instead (upstream issue #1829)
