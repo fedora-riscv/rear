@@ -80,6 +80,16 @@ Professional services and support are available.
 %prep
 %autosetup -p1
 
+# Change /lib to /usr/lib for COPY_AS_IS
+sed -E -e "s:([\"' ])/lib:\1/usr/lib:g" \
+    -i usr/share/rear/prep/GNU/Linux/*include*.sh
+
+# Same for Linux.conf
+sed -e 's:/lib/:/usr/lib/:g' \
+    -e 's:/lib\*/:/usr/lib\*/:g' \
+    -e 's:/usr/usr/lib:/usr/lib:g' \
+    -i 'usr/share/rear/conf/GNU/Linux.conf'
+
 %build
 # build HTML user guide
 make doc
