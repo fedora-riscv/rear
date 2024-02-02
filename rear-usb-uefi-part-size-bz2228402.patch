@@ -1,0 +1,41 @@
+commit 1cd41052f7a7cd42ea14ea53b7280c73624aba3f
+Author: Johannes Meixner <jsmeix@suse.com>
+Date:   Mon Mar 21 12:14:21 2022 +0100
+
+    Merge pull request #2774 from rear/jsmeix-1024-USB_UEFI_PART_SIZE
+    
+    In default.conf increase USB_UEFI_PART_SIZE to 1024 MiB,
+    cf. https://github.com/rear/rear/pull/1205
+    in particular to also make things work by default when additional
+    third-party kernel modules and firmware (e.g. from Nvidia) are used,
+    cf. https://github.com/rear/rear/issues/2770#issuecomment-1068935688
+
+diff --git a/usr/share/rear/conf/default.conf b/usr/share/rear/conf/default.conf
+index 8faa56aa..17a764cb 100644
+--- a/usr/share/rear/conf/default.conf
++++ b/usr/share/rear/conf/default.conf
+@@ -872,13 +872,20 @@ USB_PARTITION_ALIGN_BLOCK_SIZE="8"
+ # in MiB when formatting a medium by the format workflow.
+ # If USB_UEFI_PART_SIZE is empty or invalid (i.e. not an unsigned integer larger than 0)
+ # the user must interactively enter a valid value while running the format workflow.
+-# The default value of 400 MiB should be sufficiently big and it is in compliance
+-# with the 8 MiB partition alignment default value ( 400 = 8 * 50 )
+-# and even with a 16 MiB partition alignment value ( 400 = 16 * 25 )
++# The default value of 1024 MiB should be sufficiently big
+ # cf. https://github.com/rear/rear/pull/1205
++# in particular when third-party kernel modules and firmware (e.g. from Nvidia) are used
++# cf. https://github.com/rear/rear/issues/2770#issuecomment-1068935688
++# and 1024 MiB is in compliance with the 8 MiB partition alignment value ( 1024 = 8 * 128 )
++# and also with higher 2^n MiB partition alignment values.
++# Furthermore the default value of 1024 MiB results that the FAT filesystem of the ESP
++# will be in compliance with that the ESP should officially use a FAT32 filesystem
++# because mkfs.vfat automatically makes a FAT32 filesystem starting at 512 MiB
++# (a FAT16 ESP works in most cases but causes issues with certain UEFI firmware)
++# cf. https://github.com/rear/rear/issues/2575
+ # The value of USB_UEFI_PART_SIZE will be rounded to the nearest
+ # USB_PARTITION_ALIGN_BLOCK_SIZE chunk:
+-USB_UEFI_PART_SIZE="400"
++USB_UEFI_PART_SIZE="1024"
+ #
+ # Default boot option (i.e. what gets booted automatically after some timeout)
+ # when EXTLINUX boots the USB stick or USB disk or other disk device on BIOS systems.

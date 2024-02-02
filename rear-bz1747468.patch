@@ -1,0 +1,112 @@
+diff --git a/usr/share/rear/layout/prepare/GNU/Linux/110_include_lvm_code.sh b/usr/share/rear/layout/prepare/GNU/Linux/110_include_lvm_code.sh
+index 7cfdfcf2..1be17ba8 100644
+--- a/usr/share/rear/layout/prepare/GNU/Linux/110_include_lvm_code.sh
++++ b/usr/share/rear/layout/prepare/GNU/Linux/110_include_lvm_code.sh
+@@ -68,9 +68,9 @@ create_lvmgrp() {
+     local vg=${vgrp#/dev/}
+ 
+     cat >> "$LAYOUT_CODE" <<EOF
+-create_volume_group=1
+-create_logical_volumes=1
+-create_thin_volumes_only=0
++create_volume_group+=( "$vg" )
++create_logical_volumes+=( "$vg" )
++create_thin_volumes_only=( \$( RmInArray "$vg" "\${create_thin_volumes_only[@]}" ) )
+ 
+ EOF
+ 
+@@ -83,7 +83,7 @@ EOF
+     # '--mirrorlog', etc.
+     # Also, we likely do not support every layout yet (e.g. 'cachepool').
+ 
+-    if ! is_true "$MIGRATION_MODE" ; then
++    if ! is_true "$MIGRATION_MODE" && lvmgrp_supports_vgcfgrestore "$vgrp" ; then
+         cat >> "$LAYOUT_CODE" <<EOF
+ LogPrint "Restoring LVM VG '$vg'"
+ if [ -e "$vgrp" ] ; then
+@@ -97,9 +97,12 @@ if lvm vgcfgrestore -f "$VAR_DIR/layout/lvm/${vg}.cfg" $vg >&2 ; then
+ 
+     LogPrint "Sleeping 3 seconds to let udev or systemd-udevd create their devices..."
+     sleep 3 >&2
+-    create_volume_group=0
+-    create_logical_volumes=0
++    create_volume_group=( \$( RmInArray "$vg" "\${create_volume_group[@]}" ) )
++    create_logical_volumes=( \$( RmInArray "$vg" "\${create_logical_volumes[@]}" ) )
+ 
++EOF
++        if is_true "${FORCE_VGCFGRESTORE-no}"; then
++            cat >> "$LAYOUT_CODE" <<EOF
+ #
+ # It failed ... restore layout using 'vgcfgrestore --force', but then remove Thin volumes, they are broken
+ #
+@@ -121,9 +124,12 @@ elif lvm vgcfgrestore --force -f "$VAR_DIR/layout/lvm/${vg}.cfg" $vg >&2 ; then
+     sleep 3 >&2
+ 
+     # All logical volumes have been created, except Thin volumes and pools
+-    create_volume_group=0
+-    create_thin_volumes_only=1
++    create_volume_group=( \$( RmInArray "$vg" "\${create_volume_group[@]}" ) )
++    create_thin_volumes_only+=( "$vg" )
+  
++EOF
++        fi
++        cat >> "$LAYOUT_CODE" <<EOF
+ #
+ # It failed also ... restore using 'vgcreate/lvcreate' commands
+ #
+@@ -138,7 +144,7 @@ EOF
+     local -a devices=($(awk "\$1 == \"lvmdev\" && \$2 == \"$vgrp\" { print \$3 }" "$LAYOUT_FILE"))
+ 
+ cat >> "$LAYOUT_CODE" <<EOF
+-if [ \$create_volume_group -eq 1 ] ; then
++if IsInArray $vg "\${create_volume_group[@]}" ; then
+     LogPrint "Creating LVM VG '$vg'; Warning: some properties may not be preserved..."
+     if [ -e "$vgrp" ] ; then
+         rm -rf "$vgrp"
+@@ -240,9 +246,9 @@ create_lvmvol() {
+     local warnraidline
+ 
+     if [ $is_thin -eq 0 ] ; then
+-        ifline="if [ \"\$create_logical_volumes\" -eq 1 ] && [ \"\$create_thin_volumes_only\" -eq 0 ] ; then"
++        ifline="if IsInArray $vg \"\${create_logical_volumes[@]}\" && ! \$IsInArray $vg \"\${create_thin_volumes_only[@]}\" ; then"
+     else
+-        ifline="if [ \"\$create_logical_volumes\" -eq 1 ] ; then"
++        ifline="if IsInArray $vg \"\${create_logical_volumes[@]}\" ; then"
+     fi
+ 
+     if [ $is_raidunknown -eq 1 ]; then
+diff --git a/usr/share/rear/lib/layout-functions.sh b/usr/share/rear/lib/layout-functions.sh
+index 54ddb50f..ae62d666 100644
+--- a/usr/share/rear/lib/layout-functions.sh
++++ b/usr/share/rear/lib/layout-functions.sh
+@@ -1308,4 +1308,30 @@ delete_dummy_partitions_and_resize_real_ones() {
+     last_partition_number=0
+ }
+ 
++# vgcfgrestore can properly restore only volume groups that do not use
++# any kernel metadata. All volume types except linear and striped use
++# kernel metadata.
++# Check whether a VG (given as /dev/<vgname> in the first argument)
++# doesn't contain any LVs that use kernel metadata.
++# If the function returns true, we can safely use vgcfgrestore to restore the VG.
++function lvmgrp_supports_vgcfgrestore() {
++    if is_true "${FORCE_VGCFGRESTORE-no}"; then
++        # If we are willing to use vgcfgrestore --force and then remove broken volumes,
++        # then everything can be considered supported. Don't do it by default though.
++        return 0
++    fi
++
++    local lvmvol vgrp lvname size layout kval
++
++    local supported_layouts=("linear" "striped")
++
++    while read lvmvol vgrp lvname size layout kval; do
++        [ "$vgrp" == "$1" ] || BugError "vgrp '$vgrp' != '$1'"
++        if ! IsInArray $layout "${supported_layouts[@]}"; then
++            LogPrint "Layout '$layout' of LV '$lvname' in VG '$vgrp' not supported by vgcfgrestore"
++            return 1
++        fi
++    done < <(grep "^lvmvol $1 " "$LAYOUT_FILE")
++}
++
+ # vim: set et ts=4 sw=4:

@@ -1,0 +1,20 @@
+diff --git a/usr/share/rear/finalize/Fedora/i386/550_rebuild_initramfs.sh b/usr/share/rear/finalize/Fedora/550_rebuild_initramfs.sh
+similarity index 100%
+rename from usr/share/rear/finalize/Fedora/i386/550_rebuild_initramfs.sh
+rename to usr/share/rear/finalize/Fedora/550_rebuild_initramfs.sh
+diff --git a/usr/share/rear/finalize/Fedora/ppc64/550_rebuild_initramfs.sh b/usr/share/rear/finalize/Fedora/ppc64/550_rebuild_initramfs.sh
+deleted file mode 120000
+index 22eede59..00000000
+--- a/usr/share/rear/finalize/Fedora/ppc64/550_rebuild_initramfs.sh
++++ /dev/null
+@@ -1 +0,0 @@
+-../i386/550_rebuild_initramfs.sh
+\ No newline at end of file
+diff --git a/usr/share/rear/finalize/Fedora/ppc64le/550_rebuild_initramfs.sh b/usr/share/rear/finalize/Fedora/ppc64le/550_rebuild_initramfs.sh
+deleted file mode 120000
+index 22eede59..00000000
+--- a/usr/share/rear/finalize/Fedora/ppc64le/550_rebuild_initramfs.sh
++++ /dev/null
+@@ -1 +0,0 @@
+-../i386/550_rebuild_initramfs.sh
+\ No newline at end of file

@@ -1,0 +1,38 @@
+diff --git a/usr/share/rear/conf/default.conf b/usr/share/rear/conf/default.conf
+index 9ada92c3..455aa3ce 100644
+--- a/usr/share/rear/conf/default.conf
++++ b/usr/share/rear/conf/default.conf
+@@ -1813,7 +1813,7 @@ OBDR_BLOCKSIZE=2048
+ # BACKUP=NBU stuff (Symantec/Veritas NetBackup)
+ ##
+ #
+-COPY_AS_IS_NBU=( /usr/openv/bin/vnetd /usr/openv/bin/vopied /usr/openv/lib /usr/openv/netbackup /usr/openv/var/auth/[mn]*.txt )
++COPY_AS_IS_NBU=( /usr/openv/bin/vnetd /usr/openv/bin/vopied /usr/openv/lib /usr/openv/netbackup /usr/openv/var/auth/[mn]*.txt /opt/VRTSpbx /etc/vx/VxICS /etc/vx/vrtslog.conf )
+ COPY_AS_IS_EXCLUDE_NBU=( /usr/openv/netbackup/logs "/usr/openv/netbackup/bin/bpjava*" /usr/openv/netbackup/bin/xbp /usr/openv/netbackup/bin/private /usr/openv/lib/java /usr/openv/lib/shared/vddk /usr/openv/netbackup/baremetal )
+ # See https://github.com/rear/rear/issues/2105 why /usr/openv/netbackup/sec/at/lib/ is needed:
+ NBU_LD_LIBRARY_PATH="/usr/openv/lib:/usr/openv/netbackup/sec/at/lib/"
+diff --git a/usr/share/rear/rescue/NBU/default/450_prepare_netbackup.sh b/usr/share/rear/rescue/NBU/default/450_prepare_netbackup.sh
+index cd48b8d9..ae5a3ccc 100644
+--- a/usr/share/rear/rescue/NBU/default/450_prepare_netbackup.sh
++++ b/usr/share/rear/rescue/NBU/default/450_prepare_netbackup.sh
+@@ -7,6 +7,12 @@
+ 
+ [[ $NBU_version -lt 7 ]] && return	# NBU is using xinetd when version <7.x
+ 
++if [ -e "/etc/init.d/vxpbx_exchanged" ]; then
++	cp $v /etc/init.d/vxpbx_exchanged $ROOTFS_DIR/etc/scripts/system-setup.d/vxpbx_exchanged.real
++	chmod $v +x $ROOTFS_DIR/etc/scripts/system-setup.d/vxpbx_exchanged.real
++	echo "( /etc/scripts/system-setup.d/vxpbx_exchanged.real start )" > $ROOTFS_DIR/etc/scripts/system-setup.d/89-vxpbx_exchanged.sh
++fi
++
+ if [ -e "/etc/init.d/netbackup" ]; then
+ 	cp $v /etc/init.d/netbackup $ROOTFS_DIR/etc/scripts/system-setup.d/netbackup.real
+ 	chmod $v +x $ROOTFS_DIR/etc/scripts/system-setup.d/netbackup.real
+diff --git a/usr/share/rear/skel/NBU/usr/openv/tmp/.gitignore b/usr/share/rear/skel/NBU/usr/openv/tmp/.gitignore
+new file mode 100644
+index 00000000..d6b7ef32
+--- /dev/null
++++ b/usr/share/rear/skel/NBU/usr/openv/tmp/.gitignore
+@@ -0,0 +1,2 @@
++*
++!.gitignore

@@ -1,0 +1,18 @@
+diff --git a/usr/share/rear/prep/GNU/Linux/220_include_lvm_tools.sh b/usr/share/rear/prep/GNU/Linux/220_include_lvm_tools.sh
+index 4b73fb05..c7704032 100644
+--- a/usr/share/rear/prep/GNU/Linux/220_include_lvm_tools.sh
++++ b/usr/share/rear/prep/GNU/Linux/220_include_lvm_tools.sh
+@@ -8,6 +8,13 @@ PROGS+=( lvm dmsetup dmeventd fsadm )
+ 
+ COPY_AS_IS+=( /etc/lvm )
+ 
++# Workaround for a LVM segfault when creating a PV with an UUID already present
++# in the device file: omit the device file from the rescue system
++# https://bugzilla.redhat.com/show_bug.cgi?id=2117937
++# proper fix:
++# https://sourceware.org/git/?p=lvm2.git;a=commit;h=8c3cfc75c72696ae8b620555fcc4f815b0c1d6b6
++COPY_AS_IS_EXCLUDE+=( /etc/lvm/devices )
++
+ if lvs --noheadings -o thin_count | grep -q -v "^\s*$" ; then
+     # There are Thin Pools on the system, include required binaries
+     PROGS+=( thin_check )

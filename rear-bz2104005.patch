@@ -1,0 +1,21 @@
+commit 40ec3bf072a51229e81bfbfa7cedb8a7c7902dbd
+Author: Johannes Meixner <jsmeix@suse.com>
+Date:   Fri Jun 24 15:11:27 2022 +0200
+
+    Merge pull request #2827 from rear/jsmeix-fail-safe-yes-pipe-lvcreate
+    
+    and commit b3fd58fc871e00bd713a0cb081de54d746ffffb3 from pull request #2839
+
+diff --git a/usr/share/rear/layout/prepare/GNU/Linux/110_include_lvm_code.sh b/usr/share/rear/layout/prepare/GNU/Linux/110_include_lvm_code.sh
+index 1be17ba8..d34ab335 100644
+--- a/usr/share/rear/layout/prepare/GNU/Linux/110_include_lvm_code.sh
++++ b/usr/share/rear/layout/prepare/GNU/Linux/110_include_lvm_code.sh
+@@ -263,7 +263,7 @@ $ifline
+ 
+     LogPrint "Creating LVM volume '$vg/$lvname'; Warning: some properties may not be preserved..."
+     $warnraidline
+-    lvm lvcreate $lvopts $vg <<<y
++    lvm lvcreate -y $lvopts $vg
+ 
+ fi
+ EOF

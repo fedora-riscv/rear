@@ -1,0 +1,68 @@
+diff --git a/usr/share/rear/conf/Linux-ppc64.conf b/usr/share/rear/conf/Linux-ppc64.conf
+index 7e20ddc7..d7774062 100644
+--- a/usr/share/rear/conf/Linux-ppc64.conf
++++ b/usr/share/rear/conf/Linux-ppc64.conf
+@@ -1,18 +1,26 @@
+-REQUIRED_PROGS+=( sfdisk )
++REQUIRED_PROGS+=( sfdisk ofpathname )
+ 
+ PROGS+=(
+ mkofboot
+ ofpath
+ ybin
+ yabootconfig
+-bootlist
+ pseries_platform
+ nvram
+-ofpathname
+ bc
+ agetty
+ )
+ 
++if grep -q "emulated by qemu" /proc/cpuinfo ; then
++    # Qemu/KVM virtual machines don't need bootlist - don't complain if
++    # it is missing
++    PROGS+=( bootlist )
++else
++    # PowerVM environment, we need to run bootlist, otherwise
++    # we can't make the system bpotable. Be strict about requiring it
++    REQUIRED_PROGS+=( bootlist )
++fi
++
+ COPY_AS_IS+=(
+ /usr/lib/yaboot/yaboot
+ /usr/lib/yaboot/ofboot
+diff --git a/usr/share/rear/conf/Linux-ppc64le.conf b/usr/share/rear/conf/Linux-ppc64le.conf
+index d00154a2..df8066ea 100644
+--- a/usr/share/rear/conf/Linux-ppc64le.conf
++++ b/usr/share/rear/conf/Linux-ppc64le.conf
+@@ -1,10 +1,8 @@
+ REQUIRED_PROGS+=( sfdisk )
+ 
+ PROGS+=(
+-bootlist
+ pseries_platform
+ nvram
+-ofpathname
+ bc
+ agetty
+ )
+@@ -17,4 +15,18 @@ agetty
+ if [[ $(awk '/platform/ {print $NF}' < /proc/cpuinfo) != PowerNV ]] ; then
+     # No firmware files when ppc64le Linux is not run in BareMetal Mode (PowerNV):
+     test "${FIRMWARE_FILES[*]}" || FIRMWARE_FILES=( 'no' )
++    # grub2-install for powerpc-ieee1275 calls ofpathname, so without it,
++    # the rescue system can't make the recovered system bootable
++    REQUIRED_PROGS+=( ofpathname )
++    if grep -q "emulated by qemu" /proc/cpuinfo ; then
++        # Qemu/KVM virtual machines don't need bootlist - don't complain if
++        # it is missing
++        PROGS+=( bootlist )
++    else
++        # PowerVM environment, we need to run bootlist, otherwise
++        # we can't make the system bpotable. Be strict about requiring it
++        REQUIRED_PROGS+=( bootlist )
++    fi
++else
++    PROGS+=( ofpathname bootlist )
+ fi

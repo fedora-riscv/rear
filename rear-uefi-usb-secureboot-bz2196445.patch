@@ -1,0 +1,82 @@
+commit 4af486794d45adbda7567361d8dcc658599dcd2c
+Author: Johannes Meixner <jsmeix@suse.com>
+Date:   Tue Aug 8 14:44:16 2023 +0200
+
+    Merge pull request #3031 from rear/jsmeix-USB-Secure-Boot
+    
+    Secure Boot support for OUTPUT=USB:
+    In output/USB/Linux-i386/100_create_efiboot.sh
+    added SECURE_BOOT_BOOTLOADER related code that is based
+    on the code in output/ISO/Linux-i386/250_populate_efibootimg.sh
+    with some adaptions to make it work within the existing USB code.
+    The basic idea for Secure Boot booting of the ReaR recovery system
+    is to "just copy" the (signed) EFI binaries of the Linux distribution
+    (shim*.efi and grub*.efi as first and second stage UEFI bootloaders)
+    instead of let ReaR make its own EFI binary via build_bootx86_efi()
+    see https://github.com/rear/rear/pull/3031
+
+diff --git a/usr/share/rear/output/USB/Linux-i386/100_create_efiboot.sh b/usr/share/rear/output/USB/Linux-i386/100_create_efiboot.sh
+index f4659306..fd631c44 100644
+--- a/usr/share/rear/output/USB/Linux-i386/100_create_efiboot.sh
++++ b/usr/share/rear/output/USB/Linux-i386/100_create_efiboot.sh
+@@ -29,6 +29,44 @@ mount $EFI_PART $EFI_MPT || Error "Failed to mount EFI partition '$EFI_PART' at
+ mkdir -p $EFI_DST || Error "Failed to create directory '$EFI_DST'"
+ 
+ # Copy boot loader
++# The SECURE_BOOT_BOOTLOADER related code below is based on the code in output/ISO/Linux-i386/250_populate_efibootimg.sh
++# because I <jsmeix@suse.de> noticed that Secure Boot works with ISO at least for me, cf.
++# https://github.com/rear/rear/pull/3025#issuecomment-1635876186
++# but not with USB, cf.
++# https://github.com/rear/rear/pull/3025#issuecomment-1643774477
++# so I tried to re-use the ISO Secure Boot code for USB
++# which made Secure Boot "just work" for me with USB
++# but I had to do some (minor) adaptions to make it work
++# within the existing USB code, cf.
++# https://github.com/rear/rear/pull/3031#issuecomment-1653443454
++# Copy UEFI bootloader:
++if test -f "$SECURE_BOOT_BOOTLOADER" ; then
++    # For a technical description of Shim see https://mjg59.dreamwidth.org/19448.html
++    # Shim is a signed EFI binary that is a first stage bootloader
++    # that loads and executes another (signed) EFI binary
++    # which normally is a second stage bootloader
++    # which normally is a GRUB EFI binary
++    # which normally is available as a file named grub*.efi
++    # so when SECURE_BOOT_BOOTLOADER is used as UEFI_BOOTLOADER
++    # (cf. rescue/default/850_save_sysfs_uefi_vars.sh)
++    # then Shim (usually shim.efi) must be copied as EFI/BOOT/BOOTX64.efi
++    # and Shim's second stage bootloader must be also copied where Shim already is.
++    DebugPrint "Using '$SECURE_BOOT_BOOTLOADER' as first stage Secure Boot bootloader BOOTX64.efi"
++    cp -L $v "$SECURE_BOOT_BOOTLOADER" "$EFI_DST/BOOTX64.efi" || Error "Failed to copy SECURE_BOOT_BOOTLOADER '$SECURE_BOOT_BOOTLOADER' to $EFI_DST/BOOTX64.efi"
++    # When Shim is used, its second stage bootloader can be actually anything
++    # named grub*.efi (second stage bootloader is Shim compile time option), see
++    # http://www.rodsbooks.com/efi-bootloaders/secureboot.html#initial_shim
++    local uefi_bootloader_dirname="$( dirname $SECURE_BOOT_BOOTLOADER )"
++    local second_stage_UEFI_bootloader_files="$( echo $uefi_bootloader_dirname/grub*.efi )"
++    # Avoid 'nullglob' pitfall when nothing matches .../grub*.efi which would result
++    # an invalid "cp -v /var/tmp/.../EFI/BOOT/" command that fails
++    # cf. https://github.com/rear/rear/issues/1921
++    test "$second_stage_UEFI_bootloader_files" || Error "Could not find second stage Secure Boot bootloader $uefi_bootloader_dirname/grub*.efi"
++    DebugPrint "Using second stage Secure Boot bootloader files: $second_stage_UEFI_bootloader_files"
++    cp -L $v $second_stage_UEFI_bootloader_files $EFI_DST/ || Error "Failed to copy second stage Secure Boot bootloader files"
++else
++    cp -L $v "$UEFI_BOOTLOADER" "$EFI_DST/BOOTX64.efi" || Error "Failed to copy UEFI_BOOTLOADER '$UEFI_BOOTLOADER' to $EFI_DST/BOOTX64.efi"
++fi
+ cp $v $UEFI_BOOTLOADER "$EFI_DST/BOOTX64.efi" || Error "Failed to copy UEFI_BOOTLOADER '$UEFI_BOOTLOADER' to $EFI_DST/BOOTX64.efi"
+ 
+ # Copy kernel
+@@ -93,7 +131,14 @@ EOF
+                 create_grub2_cfg ${EFI_DIR}/kernel ${EFI_DIR}/$REAR_INITRD_FILENAME > ${EFI_DST}/grub.cfg
+ 
+                 # Create bootloader, this overwrite BOOTX64.efi copied in previous step ...
+-                build_bootx86_efi ${EFI_DST}/BOOTX64.efi ${EFI_DST}/grub.cfg "/boot" "$UEFI_BOOTLOADER"
++                # Create BOOTX86.efi but only if we are NOT secure booting.
++                # We are not able to create signed boot loader
++                # so we need to reuse existing one.
++                # See issue #1374
++                # build_bootx86_efi () can be safely used for other scenarios.
++                if ! test -f "$SECURE_BOOT_BOOTLOADER" ; then
++                    build_bootx86_efi ${EFI_DST}/BOOTX64.efi ${EFI_DST}/grub.cfg "/boot" "$UEFI_BOOTLOADER"
++                fi
+             ;;
+             *)
+                 BugError "Neither grub 0.97 nor 2.0"

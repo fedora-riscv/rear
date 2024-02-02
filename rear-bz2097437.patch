@@ -1,0 +1,37 @@
+commit 2922b77e950537799fdadf5b3ebf6a05d97f6f2f
+Author: pcahyna <pcahyna@users.noreply.github.com>
+Date:   Mon Jun 20 17:42:58 2022 +0200
+
+    Merge pull request #2822 from pcahyna/fix-vim-symlink
+    
+    Fix vi in the rescue system on Fedora and RHEL 9
+
+diff --git a/usr/share/rear/build/GNU/Linux/005_create_symlinks.sh b/usr/share/rear/build/GNU/Linux/005_create_symlinks.sh
+index df75e07d..55f25bef 100644
+--- a/usr/share/rear/build/GNU/Linux/005_create_symlinks.sh
++++ b/usr/share/rear/build/GNU/Linux/005_create_symlinks.sh
+@@ -8,7 +8,6 @@
+ ln -sf $v bin/init $ROOTFS_DIR/init >&2
+ ln -sf $v bin $ROOTFS_DIR/sbin >&2
+ ln -sf $v bash $ROOTFS_DIR/bin/sh >&2
+-ln -sf $v vi $ROOTFS_DIR/bin/vim >&2
+ ln -sf $v true $ROOTFS_DIR/bin/pam_console_apply >&2 # RH/Fedora with udev needs this
+ ln -sf $v ../bin $ROOTFS_DIR/usr/bin >&2
+ ln -sf $v ../bin $ROOTFS_DIR/usr/sbin >&2
+diff --git a/usr/share/rear/conf/GNU/Linux.conf b/usr/share/rear/conf/GNU/Linux.conf
+index 89aedd4c..0c97594a 100644
+--- a/usr/share/rear/conf/GNU/Linux.conf
++++ b/usr/share/rear/conf/GNU/Linux.conf
+@@ -206,6 +206,12 @@ LIBS+=(
+ )
+ 
+ COPY_AS_IS+=( /dev /etc/inputr[c] /etc/protocols /etc/services /etc/rpc /etc/termcap /etc/terminfo /lib*/terminfo /usr/share/terminfo /etc/netconfig /etc/mke2fs.conf /etc/*-release /etc/localtime /etc/magic /usr/share/misc/magic /etc/dracut.conf /etc/dracut.conf.d /usr/lib/dracut /sbin/modprobe.ksplice-orig /etc/sysctl.conf /etc/sysctl.d /etc/e2fsck.conf )
++
++# Needed by vi on Fedora and derived distributions
++# where vi is a shell script that executes /usr/libexec/vi
++# see https://github.com/rear/rear/pull/2822
++COPY_AS_IS+=( /usr/libexec/vi )
++
+ # Required by curl with https:
+ # There are stored the distribution provided certificates
+ # installed from packages, nothing confidential.
