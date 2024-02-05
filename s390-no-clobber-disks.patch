@@ -1,14 +1,38 @@
+commit 015c1ffd9fa96b01882b068714d3bc3aae3b5168
+Merge: 02dad206 20cc0137
+Author: Schlomo Schapiro <schlomo+github@schapiro.org>
+Date:   Tue Feb 28 22:46:13 2023 +0100
+
+    Merge pull request #2943 from pcahyna/s390-layout-format
+    
+    s390x (IBM Z) disk formatting fixes
+
+    Cherry-picked-by: Lukáš Zaoral <lzaoral@redhat.com>
+
+diff --git a/packaging/rpm/rear.spec b/packaging/rpm/rear.spec
+index eba48198..fb943019 100644
+--- a/packaging/rpm/rear.spec
++++ b/packaging/rpm/rear.spec
+@@ -29,8 +29,8 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+ # Of course the rear bash scripts can be installed on any architecture just as any binaries can be installed on any architecture.
+ # But the meaning of architecture dependent packages should be on what architectures they will work.
+ # Therefore only those architectures that are actually supported are explicitly listed.
+-# This avoids that rear can be "just installed" on architectures that are actually not supported (e.g. ARM or IBM z Systems):
+-ExclusiveArch: %ix86 x86_64 ppc ppc64 ppc64le ia64
++# This avoids that rear can be "just installed" on architectures that are actually not supported (e.g. ARM):
++ExclusiveArch: %ix86 x86_64 ppc ppc64 ppc64le ia64 s390x
+ # Furthermore for some architectures it requires architecture dependent packages (like syslinux for x86 and x86_64)
+ # so that rear must be architecture dependent because ifarch conditions never match in case of "BuildArch: noarch"
+ # see the GitHub issue https://github.com/rear/rear/issues/629
 diff --git a/usr/share/rear/conf/default.conf b/usr/share/rear/conf/default.conf
-index 23a83b71..0d13b487 100644
+index fe34636f..50baaf82 100644
 --- a/usr/share/rear/conf/default.conf
 +++ b/usr/share/rear/conf/default.conf
-@@ -416,6 +416,18 @@ test "$RECOVERY_UPDATE_URL" || RECOVERY_UPDATE_URL=""
- #   export MIGRATION_MODE='true'
- # directly before he calls "rear recover":
- test "$MIGRATION_MODE" || MIGRATION_MODE=''
-+####
-+
-+####
+@@ -486,6 +486,17 @@ test "$MIGRATION_MODE" || MIGRATION_MODE=''
+ # Currently by default no disk is wiped to avoid issues until this feature was more tested:
+ DISKS_TO_BE_WIPED='false'
+ 
++##
 +# Formatting DASDs (S/390 specific)
 +# DASD (Direct Access Storage Device) denotes a disk drive on the S/390 architecture.
 +# DASDs need to be formatted before use (even before creating a partition table on them).
@@ -17,10 +41,11 @@ index 23a83b71..0d13b487 100644
 +# This can be suppressed by setting FORMAT_DASDS="false". It can be useful when one intends
 +# to use already formatted DASDs as recovery target.
 +FORMAT_DASDS=""
-+####
- 
++##
++
  ##
  # Resizing partitions in MIGRATION_MODE during "rear recover"
+ #
 diff --git a/usr/share/rear/layout/prep-for-mount/Linux-s390/205_s390_enable_disk.sh b/usr/share/rear/layout/prep-for-mount/Linux-s390/205_s390_enable_disk.sh
 new file mode 120000
 index 00000000..5f7a2ac0
@@ -30,7 +55,7 @@ index 00000000..5f7a2ac0
 +../../prepare/Linux-s390/205_s390_enable_disk.sh
 \ No newline at end of file
 diff --git a/usr/share/rear/layout/prepare/GNU/Linux/100_include_partition_code.sh b/usr/share/rear/layout/prepare/GNU/Linux/100_include_partition_code.sh
-index 13c69ce8..2a2bc33f 100644
+index 84a7cd33..acc65adf 100644
 --- a/usr/share/rear/layout/prepare/GNU/Linux/100_include_partition_code.sh
 +++ b/usr/share/rear/layout/prepare/GNU/Linux/100_include_partition_code.sh
 @@ -24,6 +24,7 @@ fi
@@ -40,8 +65,8 @@ index 13c69ce8..2a2bc33f 100644
 +    local blocksize layout dasdtype dasdcyls junk2
      read component disk size label junk < <(grep "^disk $1 " "$LAYOUT_FILE")
  
-     ### Disks should be block devices.
-@@ -67,7 +68,8 @@ sync
+     cat >> "$LAYOUT_CODE" <<EOF
+@@ -57,7 +58,8 @@ sync
  
  EOF
  
@@ -51,7 +76,7 @@ index 13c69ce8..2a2bc33f 100644
  
      cat >> "$LAYOUT_CODE" <<EOF
  # Make sure device nodes are visible (eg. in RHEL4)
-@@ -93,6 +95,11 @@ create_partitions() {
+@@ -83,6 +85,11 @@ create_partitions() {
      ### List partition types/names to detect disk label type.
      local -a names=()
      local part disk size pstart name junk
@@ -63,16 +88,17 @@ index 13c69ce8..2a2bc33f 100644
      while read part disk size pstart name junk ; do
          names+=( $name )
          case $name in
-@@ -227,10 +234,12 @@ EOF
+@@ -217,12 +224,12 @@ EOF
              if [[ "$end" ]] ; then
                  end=$( mathlib_calculate "$end - 1" )
              fi
 -            if [[ "$ARCH" == "Linux-s390" ]] ; then
--                # if dasd disk is LDL formated, then do not partition it, because it is partitioned and can take only partition
--                if [[ ! "${listDasdLdl[@]}" =~ "$device" ]] ; then
--                    echo "not LDL dasd formated disk, create a partition"
 +            if [[ "$ARCH" == "Linux-s390" && "$label" == dasd ]] ; then
-+                # LDL formatted disks are already partitioned and should not be partitioned with parted or fdasd , it will fail
+                 # LDL formatted disks are already partitioned and should not be partitioned with parted or fdasd , it will fail
+-                # the listDasdLdl array contains devices such as /dev/dasdb that are formatted as LDL
+-                # listDasdLdl is set in layout/prepare/Linux-s390/205_s390_enable_disk.sh 
+-                if ! IsInArray "$device" "${listDasdLdl[@]}" ; then
+-                    echo "not LDL dasd formated disk, create a partition"
 +                if [ "$layout" == LDL ]; then
 +                    Debug "$device: LDL formatted DASD, do not create a partition"
 +                else
@@ -104,7 +130,7 @@ index 00000000..fc5be463
 +    echo "dasdfmt -b $blocksize -d $layout -y $device"
 +}
 diff --git a/usr/share/rear/layout/prepare/Linux-s390/205_s390_enable_disk.sh b/usr/share/rear/layout/prepare/Linux-s390/205_s390_enable_disk.sh
-index c4037e02..0f6946a9 100644
+index 0ff2fd58..0f6946a9 100644
 --- a/usr/share/rear/layout/prepare/Linux-s390/205_s390_enable_disk.sh
 +++ b/usr/share/rear/layout/prepare/Linux-s390/205_s390_enable_disk.sh
 @@ -2,45 +2,36 @@
@@ -130,7 +156,7 @@ index c4037e02..0f6946a9 100644
 -            # LDL formatted disks are already partitioned and should not be partitioned with parted or fdasd , it will fail
 -            # this var, listDasdLdl, is used by 100_include_partition_code.sh to exclude writing partition code to diskrestore.sh for LDL disks
 -            listDasdLdl+=( $device )
--            LogPrint "LDL disk added to listDasdLdl:" ${listDasdLdl[@]}
+-            LogPrint "LDL disk '$device' will not be partitioned (LDL disks are already partitioned)"
 -        fi
 -        LogPrint 'dasdfmt:' $device ', blocksize:' $blocksize ', layout:' $layout
 -        # dasd format
@@ -525,12 +551,12 @@ index 7a980e63..4191be33 100644
  LUN_WWID_MAP="$VAR_DIR/layout/lun_wwid_mapping"
  
 diff --git a/usr/share/rear/layout/prepare/default/250_compare_disks.sh b/usr/share/rear/layout/prepare/default/250_compare_disks.sh
-index c459b928..751433ba 100644
+index 260ab178..0931b183 100644
 --- a/usr/share/rear/layout/prepare/default/250_compare_disks.sh
 +++ b/usr/share/rear/layout/prepare/default/250_compare_disks.sh
-@@ -54,7 +54,9 @@ local more_than_one_same_orig_size=''
- # Cf. the "Compare disks one by one" code below:
+@@ -58,7 +58,9 @@ local more_than_one_same_orig_size=''
  while read disk dev size junk ; do
+     old_disks_and_sizes+=( "$dev $size" )
      if IsInArray "$size" "${original_system_used_disk_sizes[@]}" ; then
 -        more_than_one_same_orig_size='true'
 +        if ! has_mapping_hint "$dev" ; then
@@ -539,7 +565,7 @@ index c459b928..751433ba 100644
      else
          original_system_used_disk_sizes+=( "$size" )
      fi
-@@ -109,14 +111,17 @@ fi
+@@ -143,8 +145,8 @@ fi
  # No further disk comparisons are needed when MIGRATION_MODE is already set true above:
  if ! is_true "$MIGRATION_MODE" ; then
      # Compare original disks and their possible target disk one by one:
@@ -550,22 +576,28 @@ index c459b928..751433ba 100644
          Log "Comparing $dev"
          if test -e "/sys/block/$dev" ; then
              Log "Device /sys/block/$dev exists"
-             newsize=$( get_disk_size $dev )
-             if test "$newsize" -eq "$size" ; then
-                 LogPrint "Device $dev has expected (same) size $size bytes (will be used for '$WORKFLOW')"
+@@ -156,6 +158,14 @@ if ! is_true "$MIGRATION_MODE" ; then
+                 else
+                     LogPrint "Device $dev has expected (same) size $size bytes (will be used for '$WORKFLOW')"
+                 fi
 +            elif test "$( get_mapping_hint $devnode )" == "$devnode" ; then
 +                Debug "Found identical mapping hint ${devnode} -> ${devnode}"
-+                LogPrint "Device $dev found according to mapping hints (will be used for '$WORKFLOW')"
++                if is_write_protected "/sys/block/$dev"; then
++                    LogPrint "Device $dev is designated as write-protected (needs manual configuration)"
++                    MIGRATION_MODE='true'
++                else
++                    LogPrint "Device $dev found according to mapping hints (will be used for '$WORKFLOW')"
++                fi
              else
                  LogPrint "Device $dev has size $newsize bytes but $size bytes is expected (needs manual configuration)"
                  MIGRATION_MODE='true'
 diff --git a/usr/share/rear/layout/prepare/default/300_map_disks.sh b/usr/share/rear/layout/prepare/default/300_map_disks.sh
-index 2e90768c..468aa35c 100644
+index 3353daea..d7b45a84 100644
 --- a/usr/share/rear/layout/prepare/default/300_map_disks.sh
 +++ b/usr/share/rear/layout/prepare/default/300_map_disks.sh
-@@ -112,7 +112,14 @@ while read keyword orig_device orig_size junk ; do
-     # Continue with next original device when it is already used as source in the mapping file:
-     is_mapping_source "$orig_device" && continue
+@@ -121,7 +121,14 @@ while read keyword orig_device orig_size junk ; do
+     # considered again during the subsequent "same size" tests:
+     excluded_target_device_names=()
      # First, try to find if there is a current disk with same name and same size as the original:
 -    sysfs_device_name="$( get_sysfs_name "$orig_device" )"
 +    # (possibly influenced by mapping hints if known)
@@ -579,30 +611,44 @@ index 2e90768c..468aa35c 100644
      current_device="/sys/block/$sysfs_device_name"
      if test -e $current_device ; then
          current_size=$( get_disk_size $sysfs_device_name )
-@@ -122,11 +129,16 @@ while read keyword orig_device orig_size junk ; do
-         # Continue with next one if the current one is already used as target in the mapping file:
-         is_mapping_target "$preferred_target_device_name" && continue
+@@ -129,23 +136,28 @@ while read keyword orig_device orig_size junk ; do
+         # its matching actual block device (e.g. /dev/sda) must be determined:
+         preferred_target_device_name="$( get_device_name $current_device )"
          # Use the current one if it is of same size as the old one:
 -        if test "$orig_size" -eq "$current_size" ; then
 +        if has_mapping_hint "$orig_device" || test "$orig_size" -eq "$current_size" ; then
-             # Ensure the determined target device is really a block device:
+             # Ensure the target device is really a block device on the replacement hardware.
+             # Here the target device has same name as the original device which was a block device on the original hardware
+             # but it might perhaps happen that this device name is not a block device on the replacement hardware:
              if test -b "$preferred_target_device_name" ; then
 +                if has_mapping_hint "$orig_device" ; then
 +                    mapping_reason="determined by mapping hint"
 +                else
 +                    mapping_reason="same name and same size $current_size"
 +                fi
-                 add_mapping "$orig_device" "$preferred_target_device_name"
--                LogPrint "Using $preferred_target_device_name (same name and same size) for recreating $orig_device"
-+                LogPrint "Using $preferred_target_device_name ($mapping_reason) for recreating $orig_device"
-                 # Continue with next original device in the LAYOUT_FILE:
-                 continue
-             fi
+                 # Do not map if the current one is already used as target in the mapping file:
+                 if is_mapping_target "$preferred_target_device_name" ; then
+-                    DebugPrint "Cannot use $preferred_target_device_name (same name and same size) for recreating $orig_device ($preferred_target_device_name already exists as target in $MAPPING_FILE)"
++                    DebugPrint "Cannot use $preferred_target_device_name ($mapping_reason) for recreating $orig_device ($preferred_target_device_name already exists as target in $MAPPING_FILE)"
+                     excluded_target_device_names+=( "$preferred_target_device_name" )
+                 else
+                     # Ensure the determined target device is not write-protected:
+                     if is_write_protected "$preferred_target_device_name" ; then
+-                        DebugPrint "Cannot use $preferred_target_device_name (same name and same size) for recreating $orig_device ($preferred_target_device_name is write-protected)"
++                        DebugPrint "Cannot use $preferred_target_device_name ($mapping_reason) for recreating $orig_device ($preferred_target_device_name is write-protected)"
+                         excluded_target_device_names+=( "$preferred_target_device_name" )
+                     else
+                         add_mapping "$orig_device" "$preferred_target_device_name"
+-                        LogPrint "Using $preferred_target_device_name (same name and same size $current_size) for recreating $orig_device"
++                        LogPrint "Using $preferred_target_device_name ($mapping_reason) for recreating $orig_device"
+                         # Continue with next original device because the current one is now mapped:
+                         continue
+                     fi
 diff --git a/usr/share/rear/layout/save/GNU/Linux/200_partition_layout.sh b/usr/share/rear/layout/save/GNU/Linux/200_partition_layout.sh
-index 3ab7357d..da6ce64c 100644
+index 52a4b142..a3e21c48 100644
 --- a/usr/share/rear/layout/save/GNU/Linux/200_partition_layout.sh
 +++ b/usr/share/rear/layout/save/GNU/Linux/200_partition_layout.sh
-@@ -362,18 +362,27 @@ Log "Saving disk partitions."
+@@ -377,18 +377,27 @@ Log "Saving disks and their partitions"
  
              if [[ $blockd == dasd* && "$ARCH" == "Linux-s390" ]] ; then
                  devname=$(get_device_name $disk)
@@ -641,10 +687,10 @@ index 3ab7357d..da6ce64c 100644
              fi
  
              #FIXME: exclude *rpmb (Replay Protected Memory Block) for nvme*, mmcblk* and uas
-@@ -387,11 +396,38 @@ Log "Saving disk partitions."
-                 devname=$(get_device_name $disk)
-                 devsize=$(get_disk_size ${disk#/sys/block/})
-                 disktype=$(parted -s $devname print | grep -E "Partition Table|Disk label" | cut -d ":" -f "2" | tr -d " ")
+@@ -412,11 +421,38 @@ Log "Saving disks and their partitions"
+                 # which can happen when /dev/sdX is an empty SD card slot without medium,
+                 # see https://github.com/rear/rear/issues/2810
+                 test $disktype || LogPrintError "No partition label type for 'disk $devname' (may cause 'rear recover' failure)"
 -
 -                echo "# Disk $devname"
 -                echo "# Format: disk <devname> <size(bytes)> <partition label type>"
@@ -686,10 +732,10 @@ index 3ab7357d..da6ce64c 100644
                  echo "# Format: part <device> <partition size(bytes)> <partition start(bytes)> <partition type|name> <flags> /dev/<partition>"
                  extract_partitions "$devname"
 diff --git a/usr/share/rear/lib/layout-functions.sh b/usr/share/rear/lib/layout-functions.sh
-index 91c5ff73..4f5b8f6f 100644
+index cb33ac28..6dd43313 100644
 --- a/usr/share/rear/lib/layout-functions.sh
 +++ b/usr/share/rear/lib/layout-functions.sh
-@@ -93,6 +93,12 @@ abort_recreate() {
+@@ -87,6 +87,12 @@ abort_recreate() {
      restore_original_file "$LAYOUT_FILE"
  }
  
@@ -702,7 +748,7 @@ index 91c5ff73..4f5b8f6f 100644
  # Test and log if a component $1 (type $2) needs to be recreated.
  create_component() {
      local device="$1"
-@@ -722,6 +728,46 @@ get_block_size() {
+@@ -734,6 +740,46 @@ get_block_size() {
      fi
  }
  

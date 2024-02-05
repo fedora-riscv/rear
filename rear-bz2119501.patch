@@ -7,8 +7,8 @@ index 5bace664..cf960be8 100644
  # and https://github.com/rear/rear/pull/1734
  
 +# Some broken symlinks are expected. The 'build' and 'source' symlinks in kernel modules point to kernel sources
-+# and are broken untol one installs the kernel-debug-devel or kernel-devel packages (on Fedora) and even then
-+# the targets are jot included in the rescue system by default.
++# and are broken until one installs the kernel-debug-devel or kernel-devel packages (on Fedora) and even then
++# the targets are not included in the rescue system by default.
 +# Do not warn about those, it is just noise.
 +local irrelevant_symlinks=( '*/lib/modules/*/build' '*/lib/modules/*/source' )
 +function symlink_is_irrelevant () {

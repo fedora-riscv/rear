@@ -2,8 +2,8 @@
 %global debug_package %{nil}
 
 Name: rear
-Version: 2.6
-Release: 12%{?dist}
+Version: 2.7
+Release: 1%{?dist}
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 URL: http://relax-and-recover.org/
 License: GPLv3
@@ -13,46 +13,62 @@ Source0: https://github.com/rear/rear/archive/%{version}.tar.gz#/rear-%{version}
 Source1: rear.cron
 Source2: rear.service
 Source3: rear.timer
-# Skip buildin modules, RHBZ#1831311
-Patch0: 0001-skip-kernel-buildin-modules.patch
-Patch4:  rear-bz1492177-warning.patch
-Patch29: rear-bz1832394.patch
-Patch30: rear-sfdc02772301.patch
-Patch31: rear-bz1945869.patch
-Patch32: rear-bz1958247.patch
-Patch33: rear-bz1930662.patch
-Patch34: rear-tmpdir.patch
-Patch35: rear-bz1983013.patch
-Patch36: rear-bz1993296.patch
-Patch37: rear-bz1747468.patch
-Patch38: rear-bz2049091.patch
-Patch39: rear-pr2675.patch
-Patch40: rear-bz2048454.patch
-Patch41: rear-bz2035939.patch
-Patch42: rear-bz2083272.patch
-Patch43: rear-bz2111049.patch
-Patch44: rear-bz2104005.patch
-Patch45: rear-bz2097437.patch
-Patch46: rear-bz2096916.patch
-Patch47: rear-bz2096900.patch
-Patch48: rear-bz2111059.patch
-Patch49: rsync-output.patch
-Patch50: rear-bz2119501.patch
-Patch51: rear-bz2120736.patch
-Patch52: rear-bz2117937.patch
-Patch53: rear-bz2091163.patch
-Patch54: rear-bz2130945.patch
-Patch55: rear-bz2131946.patch
-Patch56: s390-no-clobber-disks.patch
-Patch57: rear-bz2188593-nbu-systemd.patch
-Patch58: rear-device-shrinking-bz2223895.patch
-Patch59: rear-usb-uefi-part-size-bz2228402.patch
-Patch60: rear-luks-key-bz2228779.patch
-Patch61: rear-uefi-usb-secureboot-bz2196445.patch
-Patch62: rear-vg-command-not-found-bz2121476.patch
-Patch63: rear-remove-lvmdevices-bz2145014.patch
-Patch64: rear-save-lvm-poolmetadatasize-RHEL-6984.patch
-Patch65: rear-skip-useless-xfs-mount-options-RHEL-10478.patch
+
+######################
+# upstream backports #
+######################
+# pass -y to lvcreate instead of piping the output of yes
+# https://github.com/rear/rear/commit/bca0e7a92af16cb7fb82ef04401cdb3286068081
+Patch101: rear-bz2104005.patch
+
+# fix initrd generation on s390x
+# https://github.com/rear/rear/commit/6d1e5ab96213a0d79489c4296cd1f5a4be645597
+Patch102: rear-bz2130945.patch
+
+# do not use ':' as a field separator in pvdisplay output
+# https://github.com/rear/rear/commit/29e739ae7c0651f8f77c60846bfbe2b6c91baa29
+Patch103: rear-bz2091163.patch
+
+# do not autoformat DASDs on s390x
+# https://github.com/rear/rear/commit/015c1ffd9fa96b01882b068714d3bc3aae3b5168
+Patch104: s390-no-clobber-disks.patch
+
+# continue when extracting shrank files with tar
+# https://github.com/rear/rear/commit/41c2d9b1fbcece4b0890ab92e9f5817621917ad3
+Patch105: rear-device-shrinking-bz2223895.patch
+
+# add secure boot support for OUTPUT=USB
+# https://github.com/rear/rear/commit/46b29195bff7f93cf5bd4c2dd83d69e5676800cb
+Patch106: rear-uefi-usb-secureboot-bz2196445.patch
+
+# remove the lvmdevices file at the end of recovery
+# https://github.com/rear/rear/commit/5a8c5086bf3fc28236436ff3ef27196509f0375d
+Patch107: rear-remove-lvmdevices-bz2145014.patch
+
+# save LVM pool metadata volume size in disk layout
+# https://github.com/rear/rear/commit/f6af518baf3b5a4dc06bf8cfea262e627eee3e07
+Patch108: rear-save-lvm-poolmetadatasize-RHEL-6984.patch
+
+# skip useless xfs mount options when mounting during recovery
+# https://github.com/rear/rear/commit/ed4c78d5fe493ea368989d0086a733653692f5cb
+Patch109: rear-skip-useless-xfs-mount-options-RHEL-10478.patch
+
+######################
+# downstream patches #
+######################
+# suggest to install grub-efi-x64-modules on x86_64 UEFI Fedora/RHEL machines
+Patch201: rear-bz1492177-warning.patch
+
+# avoid vgcfgrestore on unsupported volume types
+# https://github.com/pcahyna/rear/commit/5d5d1db3ca621eb80b9481924d1fc470571cfc09
+Patch202: rear-bz1747468.patch
+
+# skip deliberately broken symlinks in initrd on Fedora/RHEL
+Patch203: rear-bz2119501.patch
+
+# additional fixes for NBU support
+Patch204: rear-bz2120736.patch
+Patch205: rear-bz2188593-nbu-systemd.patch
 
 # rear contains only bash scripts plus documentation so that on first glance it could be "BuildArch: noarch"
 # but actually it is not "noarch" because it only works on those architectures that are explicitly supported.
@@ -178,6 +194,11 @@ install -m 0644 %{SOURCE3} %{buildroot}%{_docdir}/%{name}/
 
 #-- CHANGELOG -----------------------------------------------------------------#
 %changelog
+* Fri Feb 02 2024 Lukáš Zaoral <lzaoral@redhat.com> - 2.7-1
+- rebase to version 2.7 (rhbz#2215778)
+- drop obsolete patches
+- rebase remaining patches
+
 * Fri Feb  2 2024 Lukáš Zaoral <lzaoral@redhat.com> - 2.6-12
 - Sync with patches in CentOS Stream 9 (kudos to @pcahyna!) chronologically
   from the latest:

@@ -1,5 +1,35 @@
+From 29e739ae7c0651f8f77c60846bfbe2b6c91baa29 Mon Sep 17 00:00:00 2001
+From: Pavel Cahyna <pcahyna@redhat.com>
+Date: Sat, 31 Dec 2022 17:40:39 +0100
+Subject: [PATCH] Protect against colons in pvdisplay output
+
+LVM can be configured to show device names under /dev/disk/by-path
+in command output. These names often contain colons that separate fields
+like channel and target (for example /dev/disk/by-path/pci-*-scsi-0:0:1:0-*,
+similarly the pci-* part, which contains colon-separated PCI bus and
+device numbers). Since the "pvdisplay -c" output also uses colons as
+field separators and does not escape embedded colons in any way,
+embedded colons break parsing of this output.
+
+As a fix, use the pipe character '|' as the field separator in pvdisplay
+output. (This would break if a PV device has a '|' in its name, but this
+is very much less likely than having a ':' .)
+
+Also, configure explicitly what fields to output - "pvdisplay -c"
+prints many fields, but I have not found documentation about what fields
+is it using exactly, so one had to guess what the output means. Using
+"pvdisplay -C" and selecting the fields explicitly is much clearer.
+
+This also changes the PV size field to match documentation, the comment
+says that size is in bytes, but it actually was not in bytes. As nothing
+is actually using the PV size field, this inconsistency has not caused
+any problem in practice, and no code needs adjusting for the change.
+---
+ .../layout/save/GNU/Linux/220_lvm_layout.sh   | 24 ++++++++++++-------
+ 1 file changed, 15 insertions(+), 9 deletions(-)
+
 diff --git a/usr/share/rear/layout/save/GNU/Linux/220_lvm_layout.sh b/usr/share/rear/layout/save/GNU/Linux/220_lvm_layout.sh
-index d3c9ae86..f21845df 100644
+index e01dbf465..7400c586e 100644
 --- a/usr/share/rear/layout/save/GNU/Linux/220_lvm_layout.sh
 +++ b/usr/share/rear/layout/save/GNU/Linux/220_lvm_layout.sh
 @@ -70,14 +70,20 @@ local lvs_exit_code

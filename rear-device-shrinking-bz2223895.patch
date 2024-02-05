@@ -1,4 +1,5 @@
-commit 4f03a10d4866efc9b6920a3878e6397d170742f9
+commit 41c2d9b1fbcece4b0890ab92e9f5817621917ad3 (from 23977a19101b6e6eaeebbe8ce013332ddf9ea517)
+Merge: 23977a19 686012cb
 Author: Johannes Meixner <jsmeix@suse.com>
 Date:   Thu Jul 20 15:11:52 2023 +0200
 
@@ -12,10 +13,10 @@ Date:   Thu Jul 20 15:11:52 2023 +0200
     cf. https://github.com/rear/rear/pull/3027
 
 diff --git a/usr/share/rear/build/GNU/Linux/100_copy_as_is.sh b/usr/share/rear/build/GNU/Linux/100_copy_as_is.sh
-index ec55f331..0e402b01 100644
+index e8f2be20..2169efaa 100644
 --- a/usr/share/rear/build/GNU/Linux/100_copy_as_is.sh
 +++ b/usr/share/rear/build/GNU/Linux/100_copy_as_is.sh
-@@ -92,9 +92,13 @@ done >$copy_as_is_exclude_file
+@@ -110,9 +110,13 @@ done >$copy_as_is_exclude_file
  # COPY_AS_IS+=( /path/to/directory/* )
  # which are used in our scripts and by users in their etc/rear/local.conf
  # cf. https://github.com/rear/rear/pull/2405#issuecomment-633512932
