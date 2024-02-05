@@ -3,10 +3,10 @@
 
 Name: rear
 Version: 2.7
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
-URL: http://relax-and-recover.org/
-License: GPLv3
+URL: https://relax-and-recover.org
+License: GPL-3.0-only
 
 Source0: https://github.com/rear/rear/archive/%{version}.tar.gz#/rear-%{version}.tar.gz
 # Add cronjob and systemd timer as documentation
@@ -96,10 +96,6 @@ Requires:   /usr/sbin/bootlist
 Requires:   s390utils-base
 Requires:   s390utils-core
 %endif
-# In the end this should tell the user that rear is known to work only on ix86 x86_64 ppc ppc64 ppc64le ia64
-# and on ix86 x86_64 syslinux is explicitly required to make the bootable ISO image
-# (in addition to the default installed bootloader grub2) while on ppc ppc64 the
-# default installed bootloader yaboot is also useed to make the bootable ISO image.
 
 # Required for HTML user guide
 BuildRequires: make
@@ -184,16 +180,22 @@ install -m 0644 %{SOURCE3} %{buildroot}%{_docdir}/%{name}/
 
 #-- FILES ---------------------------------------------------------------------#
 %files
-%doc MAINTAINERS COPYING README.adoc doc/*.txt doc/user-guide/*.html
-%doc %{_mandir}/man8/rear.8*
-%doc %{_docdir}/%{name}/rear.*
+%license COPYING
+%doc MAINTAINERS README.adoc doc/*.txt doc/user-guide/*.html
 %config(noreplace) %{_sysconfdir}/rear/
 %{_datadir}/rear/
-%{_sharedstatedir}/rear/
+%{_docdir}/%{name}/rear.*
+%{_mandir}/man8/rear.8*
 %{_sbindir}/rear
+%{_sharedstatedir}/rear/
 
 #-- CHANGELOG -----------------------------------------------------------------#
 %changelog
+* Mon Feb 05 2024 Lukáš Zaoral <lzaoral@redhat.com> - 2.7-2
+- migrate to SPDX license format
+- properly use %%license and %%doc macros
+- use https in URLs
+
 * Fri Feb 02 2024 Lukáš Zaoral <lzaoral@redhat.com> - 2.7-1
 - rebase to version 2.7 (rhbz#2215778)
 - drop obsolete patches
