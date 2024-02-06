@@ -3,7 +3,7 @@
 
 Name: rear
 Version: 2.7
-Release: 3%{?dist}
+Release: 4%{?dist}
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 URL: https://relax-and-recover.org
 License: GPL-3.0-only
@@ -56,6 +56,10 @@ Patch109: rear-skip-useless-xfs-mount-options-RHEL-10478.patch
 # fix unusable recovery with newer systemd
 # https://github.com/rear/rear/commit/060fef89b6968f0c8f254e6f612eff839b83c057
 Patch110: rear-fix-compatibility-with-newer-systemd-bz2254871.patch
+
+# make initrd accessible only by root
+# https://github.com/rear/rear/commit/89b61793d80bc2cb2abe47a7d0549466fb087d16
+Patch111: rear-CVE-2024-23301.patch
 
 ######################
 # downstream patches #
@@ -195,6 +199,9 @@ install -m 0644 %{SOURCE3} %{buildroot}%{_docdir}/%{name}/
 
 #-- CHANGELOG -----------------------------------------------------------------#
 %changelog
+* Tue Feb 06 2024 Lukáš Zaoral <lzaoral@redhat.com> - 2.7-4
+- make initrd accessible only by root (CVE-2024-23301)
+
 * Tue Feb 06 2024 Lukáš Zaoral <lzaoral@redhat.com> - 2.7-3
 - fix unusable recovery with newer systemd (rbhz#2254871)
 
