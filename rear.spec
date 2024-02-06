@@ -3,7 +3,7 @@
 
 Name: rear
 Version: 2.7
-Release: 4%{?dist}
+Release: 5%{?dist}
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 URL: https://relax-and-recover.org
 License: GPL-3.0-only
@@ -126,7 +126,7 @@ Requires: iproute
 Requires:   xorriso
 %endif
 Requires: file
-Requires: dhcp-client
+Requires: dhcpcd
 %if 0%{?rhel}
 Requires: util-linux
 %endif
@@ -199,6 +199,9 @@ install -m 0644 %{SOURCE3} %{buildroot}%{_docdir}/%{name}/
 
 #-- CHANGELOG -----------------------------------------------------------------#
 %changelog
+* Tue Feb 06 2024 Lukáš Zaoral <lzaoral@redhat.com> - 2.7-5
+- replace dhcp-client with dhcpcd (rhbz#2247060)
+
 * Tue Feb 06 2024 Lukáš Zaoral <lzaoral@redhat.com> - 2.7-4
 - make initrd accessible only by root (CVE-2024-23301)
 
