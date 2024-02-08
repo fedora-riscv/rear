@@ -3,7 +3,7 @@
 
 Name: rear
 Version: 2.7
-Release: 5%{?dist}
+Release: 6%{?dist}
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 URL: https://relax-and-recover.org
 License: GPL-3.0-only
@@ -60,6 +60,11 @@ Patch110: rear-fix-compatibility-with-newer-systemd-bz2254871.patch
 # make initrd accessible only by root
 # https://github.com/rear/rear/commit/89b61793d80bc2cb2abe47a7d0549466fb087d16
 Patch111: rear-CVE-2024-23301.patch
+
+# copy the console= kernel arguments from the original system
+# https://github.com/rear/rear/commit/42e04f36f5f8eea0017915bb35e56ee285b394d7
+# https://github.com/rear/rear/commit/07da02143b5597b202e66c187e53103561018255
+Patch112: rear-copy-console-kernel-cmdline-from-host.patch
 
 ######################
 # downstream patches #
@@ -199,6 +204,9 @@ install -m 0644 %{SOURCE3} %{buildroot}%{_docdir}/%{name}/
 
 #-- CHANGELOG -----------------------------------------------------------------#
 %changelog
+* Wed Feb 07 2024 Lukáš Zaoral <lzaoral@redhat.com> - 2.7-6
+- copy the console= kernel arguments from the original system
+
 * Tue Feb 06 2024 Lukáš Zaoral <lzaoral@redhat.com> - 2.7-5
 - replace dhcp-client with dhcpcd (rhbz#2247060)
 
