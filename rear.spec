@@ -3,7 +3,7 @@
 
 Name: rear
 Version: 2.7
-Release: 6%{?dist}
+Release: 7%{?dist}
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 URL: https://relax-and-recover.org
 License: GPL-3.0-only
@@ -136,6 +136,8 @@ Requires: dhcpcd
 Requires: util-linux
 %endif
 
+Requires(post): /etc/os-release
+
 %description
 Relax-and-Recover is the leading Open Source disaster recovery and system
 migration solution. It comprises of a modular
@@ -159,10 +161,6 @@ Professional services and support are available.
 #-- PREP, BUILD & INSTALL -----------------------------------------------------#
 %prep
 %autosetup -p1
-
-### Add a specific os.conf so we do not depend on LSB dependencies
-%{?fedora:echo -e "OS_VENDOR=Fedora\nOS_VERSION=%{?fedora}" >etc/rear/os.conf}
-%{?rhel:echo -e "OS_VENDOR=RedHatEnterpriseServer\nOS_VERSION=%{?rhel}" >etc/rear/os.conf}
 
 # Change /lib to /usr/lib for COPY_AS_IS
 sed -E -e "s:([\"' ])/lib:\1/usr/lib:g" \
@@ -191,11 +189,20 @@ install -m 0644 %{SOURCE1} %{buildroot}%{_docdir}/%{name}/
 install -m 0644 %{SOURCE2} %{buildroot}%{_docdir}/%{name}/
 install -m 0644 %{SOURCE3} %{buildroot}%{_docdir}/%{name}/
 
+%post
+# Regenerate /etc/rear/os.conf file after install.  Otherwise, it will
+# contain stale information after system upgrade.
+cat > %{_sysconfdir}/rear/os.conf <<EOF
+OS_VENDOR=%{?fedora:Fedora}%{?rhel:RedHatEnterpriseServer}
+OS_VERSION=$(. /etc/os-release; echo $VERSION_ID)
+EOF
+
 #-- FILES ---------------------------------------------------------------------#
 %files
 %license COPYING
 %doc MAINTAINERS README.adoc doc/*.txt doc/user-guide/*.html
-%config(noreplace) %{_sysconfdir}/rear/
+%config(noreplace) %{_sysconfdir}/rear/local.conf
+%ghost %{_sysconfdir}/rear/os.conf
 %{_datadir}/rear/
 %{_docdir}/%{name}/rear.*
 %{_mandir}/man8/rear.8*
@@ -204,6 +211,9 @@ install -m 0644 %{SOURCE3} %{buildroot}%{_docdir}/%{name}/
 
 #-- CHANGELOG -----------------------------------------------------------------#
 %changelog
+* Thu Feb 08 2024 Lukáš Zaoral <lzaoral@redhat.com> - 2.7-7
+- do not generate /etc/rear/os.conf during build
+
 * Wed Feb 07 2024 Lukáš Zaoral <lzaoral@redhat.com> - 2.7-6
 - copy the console= kernel arguments from the original system
 
