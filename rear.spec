@@ -3,7 +3,7 @@
 
 Name: rear
 Version: 2.7
-Release: 7%{?dist}
+Release: 8%{?dist}
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 URL: https://relax-and-recover.org
 License: GPL-3.0-only
@@ -66,6 +66,20 @@ Patch111: rear-CVE-2024-23301.patch
 # https://github.com/rear/rear/commit/07da02143b5597b202e66c187e53103561018255
 Patch112: rear-copy-console-kernel-cmdline-from-host.patch
 
+# support saving and restoring hybrid BIOS/UEFI bootloader setup and clean
+# up bootloader detection
+# https://github.com/rear/rear/commit/096bfde5e234f5a803bae74f24e3821798022c7c
+# https://github.com/rear/rear/pull/3145
+Patch113: rear-restore-hybrid-bootloader-RHEL-16864.patch
+
+# resolve libs for executable links in COPY_AS_IS
+# https://github.com/rear/rear/commit/9f859c13f5ba285cd1d5983c9b595975c21888d3
+Patch114: rear-resolve-libraries-for-symlinks-in-COPY_AS_IS-RHEL-15108.patch
+
+# skip invalid disk drives (zero sized, no media) when saving layout
+# https://github.com/rear/rear/commit/c08658d5a0260c3242bb817e77b9c6dadecd14f6
+Patch115: rear-skip-invalid-drives-RHEL-22863.patch
+
 ######################
 # downstream patches #
 ######################
@@ -82,6 +96,7 @@ Patch203: rear-bz2119501.patch
 # additional fixes for NBU support
 Patch204: rear-bz2120736.patch
 Patch205: rear-bz2188593-nbu-systemd.patch
+Patch206: rear-nbu-RHEL-17390-RHEL-17393.patch
 
 # rear contains only bash scripts plus documentation so that on first glance it could be "BuildArch: noarch"
 # but actually it is not "noarch" because it only works on those architectures that are explicitly supported.
@@ -211,6 +226,17 @@ EOF
 
 #-- CHANGELOG -----------------------------------------------------------------#
 %changelog
+* Fri Feb 09 2024 Lukáš Zaoral <lzaoral@redhat.com> - 2.7-8
+- Sync with patches in CentOS Stream 9 (kudos to @pcahyna!) chronologically
+  from the latest:
+  - Resolve libs for executable links in COPY_AS_IS, PR 3073
+  - Skip invalid disk drives when saving layout PR 3047
+  - Do not delete NetBackup logs in case of errors and save
+    /usr/openv/netbackup/logs to the restored system after a successful recovery
+  - Add /usr/openv/var to COPY_AS_IS_NBU, fixes an issue seen
+    with NetBackup 10.2.0.1
+  - Support saving and restoring hybrid BIOS/UEFI bootloader, PRs 3145 3136
+
 * Thu Feb 08 2024 Lukáš Zaoral <lzaoral@redhat.com> - 2.7-7
 - do not generate /etc/rear/os.conf during build
 
