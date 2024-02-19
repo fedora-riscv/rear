@@ -3,7 +3,7 @@
 
 Name: rear
 Version: 2.7
-Release: 8%{?dist}
+Release: 9%{?dist}
 Summary: Relax-and-Recover is a Linux disaster recovery and system migration tool
 URL: https://relax-and-recover.org
 License: GPL-3.0-only
@@ -104,7 +104,7 @@ Patch206: rear-nbu-RHEL-17390-RHEL-17393.patch
 # But the meaning of architecture dependent packages should be on what architectures they will work.
 # Therefore only those architectures that are actually supported are explicitly listed.
 # This avoids that rear can be "just installed" on architectures that are actually not supported (e.g. ARM):
-ExclusiveArch: %ix86 x86_64 ppc ppc64 ppc64le ia64 s390x
+ExclusiveArch: %ix86 x86_64 ppc ppc64 ppc64le ia64 s390x riscv64
 # Furthermore for some architectures it requires architecture dependent packages (like syslinux for x86 and x86_64)
 # so that rear must be architecture dependent because ifarch conditions never match in case of "BuildArch: noarch"
 # see the GitHub issue https://github.com/rear/rear/issues/629
@@ -226,6 +226,9 @@ EOF
 
 #-- CHANGELOG -----------------------------------------------------------------#
 %changelog
+* Wed Aug 23 2023 Songsong Zhang <U2FsdGVkX1@gmail.com> - 2.7-9
+- Add riscv64 support
+
 * Fri Feb 09 2024 Lukáš Zaoral <lzaoral@redhat.com> - 2.7-8
 - Sync with patches in CentOS Stream 9 (kudos to @pcahyna!) chronologically
   from the latest:
